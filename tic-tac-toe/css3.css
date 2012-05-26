@@ -1,0 +1,74 @@
+body{
+
+	text-align:center;
+	
+}
+
+.box{
+
+	text-align:left;
+	width:auto;
+	height:auto;
+	
+}
+
+h3{
+
+	position:relative;
+	-webkit-animation:h3Animation 5s; 
+	
+}
+
+h1{
+
+	position:relative;
+	-webkit-animation:h1Animation 5s; 
+	
+}
+
+h2{
+
+	position:relative;
+	-webkit-animation:h2Animation 5s; 
+	
+}
+
+canvas{
+
+	position:relative;
+	-webkit-animation:canvasAnimation 5s; 
+	
+}
+
+@-webkit-keyframes canvasAnimation {
+
+	0%   {-webkit-transform:rotate(90deg);left:0px; top:0px;}
+	
+}
+
+@-webkit-keyframes h1Animation {
+
+	0%   {-webkit-transform:rotate(0deg)}
+	25%   {-webkit-transform:rotate(90deg)}
+	50%  {-webkit-transform:rotate(180deg)}
+	75%  {-webkit-transform:rotate(270deg)}
+	100%  { -webkit-transform:rotate(360deg)}
+	
+}
+
+@-webkit-keyframes h2Animation{
+
+	0%   {-webkit-transform: scale(1,2);}
+	25%   {-webkit-transform: scale(2,3);}
+	50%  {-webkit-transform: scale(3,4);}
+	75%  {-webkit-transform: scale(4,5);}
+	100%  { -webkit-transform: scale(0,0);}
+	
+}
+@-webkit-keyframes h3Animation{
+
+	0%   {-webkit-transform: scale(0,0);}
+	50% {-webkit-transform: scale(0,0);}
+	100%  {-webkit-transform: scale(100,100);}
+	
+}

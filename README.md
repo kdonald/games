@@ -1,1 +1,1 @@
-Corgan's Tic-Tac-Toe game
+Corgan's games
