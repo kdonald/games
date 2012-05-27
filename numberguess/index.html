@@ -29,14 +29,22 @@
       if (corgans == daddys) {
         $("#result").html("You can't guess the same number silly!");                
       } else {
+        if (corgans === number) {
+          $("#result").html("<strong>Corgan wins the jackpot! You guessed: " + number + " and win a prize!</strong>");    
+          return false;
+        }
+        if (daddys === number) {
+          $("#result").html("<strong>Daddy wins the jackpot! You guessed: " + number + " and win a prize!</strong>");    
+          return false;          
+        }
         var corgansAway = Math.abs(number - corgans);
         var daddysAway = Math.abs(number - daddys);
         if (corgansAway < daddysAway) {
-          $("#result").html("<strong>Corgan wins! The number is " + number + ".");     
+          $("#result").html("<strong>Corgan wins! The number is " + number + ".</strong>");     
         } else if (daddysAway < corgansAway) {
-          $("#result").html("<strong>Daddy wins! The number is " + number + ".");        
+          $("#result").html("<strong>Daddy wins! The number is " + number + ".</strong>");        
         } else {
-          $("#result").html("It's a tie! The number is " + number + ".");
+          $("#result").html("It's a tie! The number is " + number + ".</strong>");
         }
         number = Math.floor(Math.random() * 21);
       }
