@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Avengerland</title>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>    
+  </head>
+  <body>
+    <h1>Avengerland</h1>
+    <h3>an ACD production (v1.0)</h3>
+    <form>
+      <label>
+        Player's turn:
+        <strong></strong>
+      </label>
+      <p><button>Pick a card</button></p>
+    </form>
+    <div id="result">
+    </div>
+  </body>
+  <script>
+    var numberOfSpaces = 100, colors = [ "black", "green", "purple", "blue", "red", "yellow"],
+      board = new Array(numberOfSpaces), space, color = 0,
+      numberOfCards = 100, cards = new Array(numberOfCards), i,
+      turn = 0;
+    
+    console.log("The Board");
+    console.log("===========")
+    for (space = 0; space < 100; space += 1) {
+      board[space] = colors[color];
+      color = color + 1;      
+      if (color === 6) {
+        color = 0;
+      }
+      console.log(board[space]);
+    }
+
+    console.log("The Cards");
+    console.log("===========")    
+    for (i = 0; i < 100; i += 1) {
+      cards[i] = colors[Math.floor(Math.random() * 6)];
+      console.log(cards[i]);
+    }
+    
+    var players = ["Black Widow", "Hawkeye"], player = 0, numberOfPlayers = 2, playerPositions = [0, 0];
+    
+    
+    $("label strong").html(players[player]);
+    
+    $("button").click(function() {
+      var color = cards[turn];
+      console.log("Card picked: " + color);
+      for (var pos = playerPositions[player]; pos < 100; pos += 1) {
+        if (board[pos] === color) {
+          playerPositions[player] = pos + 1;
+          break;
+        }
+      }
+      if (playerPositions[player] === 100) {
+        $("#result").html(players[player] + " wins!");
+        return false;
+      }
+      turn += 1;      
+      console.log(players[player] + " picked '" + color + " and moves to " + playerPositions[player]);
+      $("#result").html("Last move: " + players[player] + " picked '" + color + "' and moves to " + playerPositions[player]);      
+      player += 1;      
+      if (player === numberOfPlayers) {
+        player = 0;
+      }
+      $("label strong").html(players[player]);
+      return false;
+    })
+    
+  </script>
+</html>
