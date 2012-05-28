@@ -2,11 +2,11 @@
 <html>
   <head>
     <title>Avengerland</title>
-    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>    
+    <script src="../graceworks/libs/jquery-core-1.7.2.js"></script>    
   </head>
   <body>
     <h1>Avengerland</h1>
-    <h3>an ACD production (v1.0)</h3>
+    <h3>an ACD production (v1.1)</h3>
     <form>
       <label>
         Player's turn:
@@ -17,58 +17,186 @@
     <div id="result">
     </div>
   </body>
-  <script>
-    var numberOfSpaces = 100, colors = [ "black", "green", "purple", "blue", "red", "yellow"],
-      board = new Array(numberOfSpaces), space, color = 0,
-      numberOfCards = 100, cards = new Array(numberOfCards), i,
-      turn = 0;
-    
-    console.log("The Board");
-    console.log("===========")
-    for (space = 0; space < 100; space += 1) {
-      board[space] = colors[color];
-      color = color + 1;      
-      if (color === 6) {
-        color = 0;
-      }
-      console.log(board[space]);
-    }
+  <script>  
+    var makeBoard = (function() {
 
-    console.log("The Cards");
-    console.log("===========")    
-    for (i = 0; i < 100; i += 1) {
-      cards[i] = colors[Math.floor(Math.random() * 6)];
-      console.log(cards[i]);
-    }
-    
-    var players = ["Black Widow", "Hawkeye"], player = 0, numberOfPlayers = 2, playerPositions = [0, 0];
-    
-    
-    $("label strong").html(players[player]);
-    
-    $("button").click(function() {
-      var color = cards[turn];
-      console.log("Card picked: " + color);
-      for (var pos = playerPositions[player]; pos < 100; pos += 1) {
-        if (board[pos] === color) {
-          playerPositions[player] = pos + 1;
-          break;
-        }
+      function randomNumber(max) {
+        return Math.floor(Math.random() * max);   
       }
-      if (playerPositions[player] === 100) {
-        $("#result").html(players[player] + " wins!");
+      
+      function createBoard(args) {
+        var board = new Array(args.numberOfSpaces), i, j = 0, color = 0, specialPos = false;
+        board.colors = args.colors;
+        board.specials = args.specials;
+        console.log("The Board");
+        console.log("===========");     
+        for (i = 0; i < board.length; i += 1) {
+          if (specialPos) {
+            board[i] = { 
+              type: "special",
+              item: board.specials[j]
+            }
+            j += 1;
+            specialPos = false;
+          } else {
+            board[i] = {
+              type: board.colors[color]
+            }
+            color += 1;
+            if (color === 5) {
+              specialPos = true;              
+            }
+            if (color === args.colors.length) {
+              color = 0;
+            }
+          }
+          console.log(i, board[i]);
+        }
+        return board;
+      }
+
+      function addCards(board) {
+        console.log("The Cards");
+        console.log("===========");
+        var cards = Array(board.length), i, j, multipliers = [ 1, 1, 1, 2 ];
+        for (i = 0; i < board.length; i += 1) {
+          j = randomNumber(board.colors.length + 1);
+          if (j === board.colors.length) {
+            cards[i] = {
+              type: "special"
+            }
+          } else {
+            cards[i] = {
+              type: board.colors[j],
+              multiplier: multipliers[randomNumber(multipliers.length)]
+            }
+          }
+          console.log(i, cards[i]);
+        }
+        board.cards = cards;
+      }
+            
+      return function(args) {
+        var board = createBoard(args);
+        addCards(board);
+        return board;
+      }
+      
+    })();
+      
+    var makeGame = (function() {
+      
+      var space = function(card, board, prev) {
+        if (!prev) {
+          prev = {
+            position: this.position,
+            type: board[this.position].type,
+            item: board[this.position].item
+          };          
+        }
+        var pos, s;
+        for (pos = prev.position; pos < 100; pos += 1) {
+          s = board[pos];
+          if (card.type === s.type) {
+            if (!card.multiplier || card.multiplier === 1) {
+              return {
+                position: pos + 1,
+                type: s.type,
+                item: s.item
+              }
+            } else {
+              return space({
+                  type: card.type,
+                  multiplier: (card.multiplier - 1),
+                }, board, { 
+                  position: pos + 1,
+                  type: s.type,
+                  item: s.item
+                }
+              );
+            }
+          }
+        }
+        return prev;
+      }
+      
+      return function(args) {
+        var i, game = {};
+        game.board = args.board;
+        game.players = new Array(args.players.length);
+        for (i = 0; i < args.players.length; i++) {
+          game.players[i] = {};
+          game.players[i].name = args.players[i];
+          game.players[i].position = 0;
+          game.players[i].space = space;
+        }
+        game.turn = 0;
+        game.move = function() {
+          if (this.won()) {
+            throw new Error("The game is already over.");
+          }
+          var card = this.board.cards[this.turn], space, nextPlayer;
+          space = this.currentPlayer().space(card, this.board);
+          if (space.type === "special") {
+            if (space.item === "loki") {
+              nextPlayer = true;
+            } else {
+              this.currentPlayer().position = space.position;
+              nextPlayer = false;
+            }
+          } else {
+            this.currentPlayer().position = space.position;
+            nextPlayer = true;
+          }
+          if (this.won()) {
+            return true;
+          }
+          game.lastMove = this.currentPlayer().name + " picks ";
+          game.lastMove += card.type === "special" ? card.type : card.multiplier + " " + card.type;
+          game.lastMove += " and moves to " + this.currentPlayer().position;
+          if (space.item) {
+            game.lastMove += " (landed on " + space.item + ")";
+          }
+          if (nextPlayer) {
+            this.currentPlayerIndex += 1;
+            if (this.currentPlayerIndex === this.players.length) {
+              this.currentPlayerIndex = 0;
+            }
+          }
+          this.turn += 1;
+        }
+        game.currentPlayerIndex = 0;
+        game.currentPlayer = function() {
+          return this.players[this.currentPlayerIndex];
+        }
+        game.won = function() {
+          return this.currentPlayer().position === this.board.length;
+        }
+        return game;
+      }
+      
+    })();
+
+    var game = makeGame({
+      players: ["Black Widow", "Hawkeye"],
+      board: makeBoard({
+        numberOfSpaces: 100,
+        colors: ["black", "green", "orange", "purple", "blue", "red", "yellow", "silver", "gold"],
+        specials: ["shield", "loki", "hammer", "loki", "bow", "loki", "helmet", "loki", "gun", "loki"]
+      })
+    });
+        
+    $("label strong").html(game.currentPlayer().name);
+
+    $("button").click(function() {
+      if (game.move()) {
+        $("#result").html(game.currentPlayer().name + " wins!");
+        $("button").attr("disabled", true);
         return false;
       }
-      turn += 1;      
-      console.log(players[player] + " picked '" + color + " and moves to " + playerPositions[player]);
-      $("#result").html("Last move: " + players[player] + " picked '" + color + "' and moves to " + playerPositions[player]);      
-      player += 1;      
-      if (player === numberOfPlayers) {
-        player = 0;
-      }
-      $("label strong").html(players[player]);
+      $("#result").html(game.lastMove);
+      $("label strong").html(game.currentPlayer().name);
       return false;
-    })
-    
+    });
   </script>
 </html>
