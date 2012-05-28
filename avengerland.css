@@ -1,0 +1,58 @@
+body {
+  font-family: Helvetica;
+}
+
+.hidden {
+  display: none;
+}
+
+#playersTurn {
+  margin: 10px;
+}
+
+#lastMove {
+  margin: 10px;
+}
+
+button {
+  margin: 10px;
+  font-size: 14px;
+  height: 50px;
+  width: 120px;
+}
+
+#item {
+  margin-top: 10px;
+	height: 450px;
+	width: 450px;
+}
+
+.shield {
+	background-image: url(avengerland/shield.jpg);
+  background-repeat: no-repeat;
+}
+
+.helmet {
+	background-image: url(avengerland/helmet.jpg);
+  background-repeat: no-repeat;	
+}
+
+.hammer {
+	background-image: url(avengerland/hammer.jpg);
+  background-repeat: no-repeat;	
+}
+
+.bow {
+	background-image: url(avengerland/bow.jpg);
+  background-repeat: no-repeat;	
+}
+
+.gun {
+	background-image: url(avengerland/gun.jpg);
+  background-repeat: no-repeat;	
+}
+
+.loki {
+	background-image: url(avengerland/loki.jpg);
+  background-repeat: no-repeat;	
+}

@@ -2,20 +2,48 @@
 <html>
   <head>
     <title>Avengerland</title>
-    <script src="../graceworks/libs/jquery-core-1.7.2.js"></script>    
+    <script src="../graceworks/libs/jquery-core-1.7.2.js"></script>
+    <link rel="stylesheet" href="avengerland.css" />  
   </head>
   <body>
     <h1>Avengerland</h1>
     <h3>an ACD production (v1.1)</h3>
-    <form>
+    <p>If this is your first time playing, <a href="#">read the rules</a>.
+    <div id="rules" class="hidden">
+      <p>
+        Avengerland is a modern take on the popular board game Candyland.
+      </p>
+      <p>
+        Two players take turns drawing cards that advance them on a board of 100 spaces.
+        The first player to get to the end of the board wins.
+      </p>
+      <p>
+        There are two types of cards: color cards and special cards.
+      </p>
+      <p>
+        If a player draws a color card, he or she advances to the next space on the board of that color;
+        either the next one or two spaces depending on the number of color blocks on the card.
+      </p>
+      <p>
+        If a player draws a special card, he or she advances to the next special space.
+        If the special space is an Avenger Item, such as Thor's Hammer, the player moves there and earns another turn.
+        If the special space is Loki, the player stays in his or her current position.
+      </p>
+    </div>
+    <div id="playersTurn">
       <label>
         Player's turn:
         <strong></strong>
-      </label>
-      <p><button>Pick a card</button></p>
-    </form>
-    <div id="result">
+      </label>  
     </div>
+    <div id="lastMove">
+      <label>
+        Last move:
+        <strong></strong>
+      </label>    
+    </div>
+    <button>Pick a card</button>
+    <div id="item"></div>
   </body>
   <script>  
     var makeBoard = (function() {
@@ -135,7 +163,7 @@
           if (this.won()) {
             throw new Error("The game is already over.");
           }
-          var card = this.board.cards[this.turn], space, nextPlayer;
+          var card = this.board.cards[this.turn], space, nextPlayer, startingPosition = this.currentPlayer().position;
           space = this.currentPlayer().space(card, this.board);
           if (space.type === "special") {
             if (space.item === "loki") {
@@ -151,11 +179,13 @@
           if (this.won()) {
             return true;
           }
-          game.lastMove = this.currentPlayer().name + " picks ";
-          game.lastMove += card.type === "special" ? card.type : card.multiplier + " " + card.type;
-          game.lastMove += " and moves to " + this.currentPlayer().position;
-          if (space.item) {
-            game.lastMove += " (landed on " + space.item + ")";
+          game.lastMove = {
+            player: this.currentPlayer().name,
+            card: card,
+            landedOn: space,
+            startingPosition: startingPosition,
+            endingPosition: this.currentPlayer().position,
+            earnsAnotherTurn: !nextPlayer,
           }
           if (nextPlayer) {
             this.currentPlayerIndex += 1;
@@ -186,17 +216,45 @@
       })
     });
         
-    $("label strong").html(game.currentPlayer().name);
+    var playerField = $("#playersTurn strong"), moveField = $("#lastMove strong"), pickButton = $("button")
+    playerField.html(game.currentPlayer().name);
+    pickButton.focus();
 
+    $("p > a").click(function() {
+      $("#rules").toggleClass("hidden");
+    });
+    
     $("button").click(function() {
       if (game.move()) {
-        $("#result").html(game.currentPlayer().name + " wins!");
+        moveField.html(game.currentPlayer().name + " wins!");
         $("button").attr("disabled", true);
         return false;
       }
-      $("#result").html(game.lastMove);
-      $("label strong").html(game.currentPlayer().name);
+      moveField.html(lastMove(game));
+      playerField.html(game.currentPlayer().name);
       return false;
     });
+    
+    function lastMove(game) {
+      var lastMove = game.lastMove.player + " picks ";
+      lastMove += game.lastMove.card.type === "special" ?
+        game.lastMove.card.type : game.lastMove.card.multiplier + " " + game.lastMove.card.type;
+      if (game.lastMove.startingPosition === game.lastMove.endingPosition) {
+        lastMove += " and stays at " + game.lastMove.startingPosition;
+      } else {
+        lastMove += " and moves from " + game.lastMove.startingPosition + " to " + game.lastMove.endingPosition;
+      }
+      if (game.lastMove.earnsAnotherTurn) {
+        lastMove += " and gets another turn";
+      }      
+      if (game.lastMove.landedOn.item) {
+        lastMove += " (landed on " + game.lastMove.landedOn.item + ")";
+        $("#item").addClass(game.lastMove.landedOn.item)
+      } else {
+        $("#item").removeClass(game.lastMove.landedOn.item);
+      }
+      return lastMove;      
+    }
+    
   </script>
 </html>
