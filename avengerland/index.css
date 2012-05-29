@@ -28,31 +28,31 @@ button {
 }
 
 .shield {
-	background-image: url(avengerland/shield.jpg);
+	background-image: url(images/shield.jpg);
   background-repeat: no-repeat;
 }
 
 .helmet {
-	background-image: url(avengerland/helmet.jpg);
+	background-image: url(images/helmet.jpg);
   background-repeat: no-repeat;	
 }
 
 .hammer {
-	background-image: url(avengerland/hammer.jpg);
+	background-image: url(images/hammer.jpg);
   background-repeat: no-repeat;	
 }
 
 .bow {
-	background-image: url(avengerland/bow.jpg);
+	background-image: url(images/bow.jpg);
   background-repeat: no-repeat;	
 }
 
 .gun {
-	background-image: url(avengerland/gun.jpg);
+	background-image: url(images/gun.jpg);
   background-repeat: no-repeat;	
 }
 
 .loki {
-	background-image: url(avengerland/loki.jpg);
+	background-image: url(images/loki.jpg);
   background-repeat: no-repeat;	
 }
