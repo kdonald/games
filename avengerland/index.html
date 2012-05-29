@@ -2,73 +2,253 @@
 <html>
   <head>
     <title>Avengerland</title>
-    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>    
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <link rel="stylesheet" href="index.css" />
+    <meta name="description" content="A modern take on Candyland by Annabelle and Corgan."> 
   </head>
   <body>
     <h1>Avengerland</h1>
-    <h3>an ACD production (v1.0)</h3>
-    <form>
+    <h3>an ACD production (v1.1)</h3>
+    <p>If this is your first time playing, <a href="#">read the rules</a>.
+    <div id="rules" class="hidden">
+      <p>
+        Avengerland is a modern take on the popular board game Candyland.
+      </p>
+      <p>
+        Two players take turns drawing cards that advance them on a board of 100 spaces.
+        The first player to get to the end of the board wins.
+      </p>
+      <p>
+        There are two types of cards: color cards and special cards.
+      </p>
+      <p>
+        If a player draws a color card, she advances to the next space on the board of that color;
+        either the next one or two spaces depending on the number of color blocks on the card.
+      </p>
+      <p>
+        If a player draws a special card, she advances to the next special space.
+        If the special space is an Avenger Item, such as Thor's Hammer, the player moves there and earns another turn.
+        If the special space is Loki, the player moves back to the space she was on when the turn began.
+      </p>
+      <p>
+        Enjoy playing! -  Annabelle and Corgan, Avengerland Designers
+      </p>
+    </div>
+    <div id="playersTurn">
       <label>
         Player's turn:
         <strong></strong>
-      </label>
-      <p><button>Pick a card</button></p>
-    </form>
-    <div id="result">
+      </label>  
     </div>
+    <div id="lastMove">
+      <label>
+        Last move:
+        <strong></strong>
+      </label>    
+    </div>
+    <button>Pick a card</button>
+    <div id="item"></div>
   </body>
-  <script>
-    var numberOfSpaces = 100, colors = [ "black", "green", "purple", "blue", "red", "yellow"],
-      board = new Array(numberOfSpaces), space, color = 0,
-      numberOfCards = 100, cards = new Array(numberOfCards), i,
-      turn = 0;
-    
-    console.log("The Board");
-    console.log("===========")
-    for (space = 0; space < 100; space += 1) {
-      board[space] = colors[color];
-      color = color + 1;      
-      if (color === 6) {
-        color = 0;
-      }
-      console.log(board[space]);
-    }
+  <script>  
+    var makeBoard = (function() {
 
-    console.log("The Cards");
-    console.log("===========")    
-    for (i = 0; i < 100; i += 1) {
-      cards[i] = colors[Math.floor(Math.random() * 6)];
-      console.log(cards[i]);
-    }
-    
-    var players = ["Black Widow", "Hawkeye"], player = 0, numberOfPlayers = 2, playerPositions = [0, 0];
-    
-    
-    $("label strong").html(players[player]);
+      function randomNumber(max) {
+        return Math.floor(Math.random() * max);   
+      }
+      
+      function createBoard(args) {
+        var board = new Array(args.numberOfSpaces), i, j = 0, color = 0, specialPos = false;
+        board.colors = args.colors;
+        board.specials = args.specials;
+        for (i = 0; i < board.length; i += 1) {
+          if (specialPos) {
+            board[i] = { 
+              type: "special",
+              item: board.specials[j]
+            }
+            j += 1;
+            specialPos = false;
+          } else {
+            board[i] = {
+              type: board.colors[color]
+            }
+            color += 1;
+            if (color === 5) {
+              specialPos = true;              
+            }
+            if (color === args.colors.length) {
+              color = 0;
+            }
+          }
+        }
+        return board;
+      }
+
+      function addCards(board) {
+        var cards = Array(board.length), i, j, multipliers = [ 1, 1, 1, 2 ];
+        for (i = 0; i < board.length; i += 1) {
+          j = randomNumber(board.colors.length + 1);
+          if (j === board.colors.length) {
+            cards[i] = {
+              type: "special"
+            }
+          } else {
+            cards[i] = {
+              type: board.colors[j],
+              multiplier: multipliers[randomNumber(multipliers.length)]
+            }
+          }
+        }
+        board.cards = cards;
+      }
+            
+      return function(args) {
+        var board = createBoard(args);
+        addCards(board);
+        return board;
+      }
+      
+    })();
+      
+    var makeGame = (function() {
+      
+      var space = function(card, board, prev) {
+        if (!prev) {
+          prev = { position: this.position }
+        }
+        var pos, s;
+        for (pos = prev.position + 1; pos < board.length; pos += 1) {
+          s = board[pos];
+          if (card.type === s.type) {
+            if (!card.multiplier || card.multiplier === 1) {
+              return {
+                position: pos,
+                type: s.type,
+                item: s.item
+              }
+            } else {
+              return space({
+                  type: card.type,
+                  multiplier: (card.multiplier - 1),
+                }, board, { 
+                  position: pos,
+                  type: s.type,
+                  item: s.item
+                }
+              );
+            }
+          }
+        }
+        return prev;
+      }
+      
+      return function(args) {
+        var i, game = {};
+        game.board = args.board;
+        game.players = new Array(args.players.length);
+        for (i = 0; i < args.players.length; i++) {
+          game.players[i] = {};
+          game.players[i].name = args.players[i];
+          game.players[i].position = -1;
+          game.players[i].space = space;
+        }
+        game.turn = 0;
+        game.move = function() {
+          if (this.won()) {
+            throw new Error("The game is already over.");
+          }
+          var card = this.board.cards[this.turn], space, nextPlayer, startingPosition = this.currentPlayer().position;
+          space = this.currentPlayer().space(card, this.board);
+          if (space.type === "special") {
+            if (space.item === "loki") {
+              nextPlayer = true;
+            } else {
+              this.currentPlayer().position = space.position;
+              nextPlayer = false;
+            }
+          } else {
+            this.currentPlayer().position = space.position;
+            nextPlayer = true;
+          }
+          if (this.won()) {
+            return true;
+          }
+          game.lastMove = {
+            player: this.currentPlayer().name,
+            card: card,
+            landedOn: space,
+            startingPosition: startingPosition,
+            endingPosition: this.currentPlayer().position,
+            earnsAnotherTurn: !nextPlayer,
+          }
+          if (nextPlayer) {
+            this.currentPlayerIndex += 1;
+            if (this.currentPlayerIndex === this.players.length) {
+              this.currentPlayerIndex = 0;
+            }
+          }
+          this.turn += 1;
+        }
+        game.currentPlayerIndex = 0;
+        game.currentPlayer = function() {
+          return this.players[this.currentPlayerIndex];
+        }
+        game.won = function() {
+          return this.currentPlayer().position === this.board.length - 1;
+        }
+        return game;
+      }
+      
+    })();
+
+    var game = makeGame({
+      players: ["Black Widow", "Hawkeye"],
+      board: makeBoard({
+        numberOfSpaces: 100,
+        colors: ["black", "green", "orange", "purple", "blue", "red", "yellow", "silver", "gold"],
+        specials: ["shield", "loki", "hammer", "loki", "bow", "loki", "helmet", "loki", "gun", "loki"]
+      })
+    });
+        
+    var playerField = $("#playersTurn strong"), moveField = $("#lastMove strong"), pickButton = $("button")
+    playerField.html(game.currentPlayer().name);
+    pickButton.focus();
+
+    $("p > a").click(function() {
+      $("#rules").toggleClass("hidden");
+    });
     
     $("button").click(function() {
-      var color = cards[turn];
-      console.log("Card picked: " + color);
-      for (var pos = playerPositions[player]; pos < 100; pos += 1) {
-        if (board[pos] === color) {
-          playerPositions[player] = pos + 1;
-          break;
-        }
-      }
-      if (playerPositions[player] === 100) {
-        $("#result").html(players[player] + " wins!");
+      if (game.move()) {
+        moveField.html(game.currentPlayer().name + " wins!");
+        $("button").attr("disabled", true);
         return false;
       }
-      turn += 1;      
-      console.log(players[player] + " picked '" + color + " and moves to " + playerPositions[player]);
-      $("#result").html("Last move: " + players[player] + " picked '" + color + "' and moves to " + playerPositions[player]);      
-      player += 1;      
-      if (player === numberOfPlayers) {
-        player = 0;
-      }
-      $("label strong").html(players[player]);
+      moveField.html(lastMove(game));
+      playerField.html(game.currentPlayer().name);
       return false;
-    })
+    });
+    
+    function lastMove(game) {
+      var lastMove = game.lastMove.player + " picks ";
+      lastMove += game.lastMove.card.type === "special" ?
+        game.lastMove.card.type : game.lastMove.card.multiplier + " " + game.lastMove.card.type;
+      if (game.lastMove.startingPosition === game.lastMove.endingPosition) {
+        lastMove += " and stays at " + game.lastMove.startingPosition;
+      } else {
+        lastMove += " and moves from " + game.lastMove.startingPosition + " to " + game.lastMove.endingPosition;
+      }
+      if (game.lastMove.earnsAnotherTurn) {
+        lastMove += " and gets another turn";
+      }      
+      if (game.lastMove.landedOn.item) {
+        lastMove += " (landed on " + game.lastMove.landedOn.item + ")";
+        $("#item").addClass(game.lastMove.landedOn.item)
+      } else {
+        $("#item").removeClass(game.lastMove.landedOn.item);
+      }
+      return lastMove;      
+    }
     
   </script>
 </html>
