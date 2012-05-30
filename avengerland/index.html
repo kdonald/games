@@ -170,9 +170,6 @@
             this.currentPlayer().position = space.position;
             nextPlayer = true;
           }
-          if (this.won()) {
-            return true;
-          }
           game.lastMove = {
             player: this.currentPlayer().name,
             card: card,
@@ -181,6 +178,9 @@
             endingPosition: this.currentPlayer().position,
             earnsAnotherTurn: !nextPlayer,
           }
+          if (this.won()) {
+            return true;
+          }          
           if (nextPlayer) {
             this.currentPlayerIndex += 1;
             if (this.currentPlayerIndex === this.players.length) {
@@ -210,23 +210,26 @@
       })
     });
         
-    var playerField = $("#playersTurn strong"), moveField = $("#lastMove strong"), pickButton = $("button")
+    var playerField = $("#playersTurn strong"), moveField = $("#lastMove strong"), pickCardButton = $("button")
     playerField.html(game.currentPlayer().name);
-    pickButton.focus();
+    pickCardButton.focus();
 
     $("p > a").click(function() {
       $("#rules").toggleClass("hidden");
       return false;
     });
     
-    $("button").click(function() {
-      if (game.move()) {
-        moveField.html(game.currentPlayer().name + " wins!");
-        $("button").attr("disabled", true);
-        return false;
-      }
+    pickCardButton.click(function() {
+      var won = game.move();
       moveField.html(lastMove(game));
-      playerField.html(game.currentPlayer().name);
+      itemIndicator(game.lastMove.landedOn.item);
+      if (won) {
+        moveField.html(game.currentPlayer().name + " wins!");
+        pickCardButton.attr("disabled", true);
+      } else {
+        playerField.html(game.currentPlayer().name);
+        pickCardButton.focus();        
+      }
       return false;
     });
     
@@ -244,11 +247,16 @@
       }      
       if (game.lastMove.landedOn.item) {
         lastMove += " (landed on " + game.lastMove.landedOn.item + ")";
-        $("#item").addClass(game.lastMove.landedOn.item)
-      } else {
-        $("#item").removeClass(game.lastMove.landedOn.item);
       }
       return lastMove;      
+    }
+    
+    function itemIndicator(item) {
+      if (item) {
+        $("#item").addClass(item)
+      } else {
+        $("#item").removeClass();
+      }      
     }
     
   </script>
