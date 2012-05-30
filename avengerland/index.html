@@ -238,9 +238,9 @@
       lastMove += game.lastMove.card.type === "special" ?
         game.lastMove.card.type : game.lastMove.card.multiplier + " " + game.lastMove.card.type;
       if (game.lastMove.startingPosition === game.lastMove.endingPosition) {
-        lastMove += " and stays at " + game.lastMove.startingPosition;
+        lastMove += " and stays at " + (game.lastMove.startingPosition + 1);
       } else {
-        lastMove += " and moves from " + game.lastMove.startingPosition + " to " + game.lastMove.endingPosition;
+        lastMove += " and moves from " + (game.lastMove.startingPosition + 1) + " to " + (game.lastMove.endingPosition + 1);
       }
       if (game.lastMove.earnsAnotherTurn) {
         lastMove += " and gets another turn";
