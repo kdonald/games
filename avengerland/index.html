@@ -49,69 +49,69 @@
     <button>Pick a card</button>
     <div id="item"></div>
   </body>
-  <script>  
-    var makeBoard = (function() {
+  <script>
+    var avengerland = (function() {
 
-      function randomNumber(max) {
-        return Math.floor(Math.random() * max);   
-      }
-      
-      function createBoard(args) {
-        var board = new Array(args.numberOfSpaces), i, j = 0, color = 0, specialPos = false;
-        board.colors = args.colors;
-        board.specials = args.specials;
-        for (i = 0; i < board.length; i += 1) {
-          if (specialPos) {
-            board[i] = { 
-              type: "special",
-              item: board.specials[j]
-            }
-            j += 1;
-            specialPos = false;
-          } else {
-            board[i] = {
-              type: board.colors[color]
-            }
-            color += 1;
-            if (color === 5) {
-              specialPos = true;              
-            }
-            if (color === args.colors.length) {
-              color = 0;
+      var makeBoard = (function() {
+
+        function randomNumber(max) {
+          return Math.floor(Math.random() * max);   
+        }
+
+        function createBoard(params) {
+          var board = new Array(params.numberOfSpaces), i, j = 0, color = 0, specialPos = false;
+          board.colors = params.colors;
+          board.specials = params.specials;
+          for (i = 0; i < board.length; i += 1) {
+            if (specialPos) {
+              board[i] = { 
+                type: "special",
+                item: board.specials[j]
+              }
+              j += 1;
+              specialPos = false;
+            } else {
+              board[i] = {
+                type: board.colors[color]
+              }
+              color += 1;
+              if (color === 5) {
+                specialPos = true;              
+              }
+              if (color === board.colors.length) {
+                color = 0;
+              }
             }
           }
+          return board;
         }
-        return board;
-      }
 
-      function addCards(board) {
-        var cards = Array(board.length), i, j, multipliers = [ 1, 1, 1, 2 ];
-        for (i = 0; i < board.length; i += 1) {
-          j = randomNumber(board.colors.length + 1);
-          if (j === board.colors.length) {
-            cards[i] = {
-              type: "special"
-            }
-          } else {
-            cards[i] = {
-              type: board.colors[j],
-              multiplier: multipliers[randomNumber(multipliers.length)]
+        function addCards(board, numberOfPlayers) {
+          var cards = Array(board.length), i, j, multipliers = [ 1, 1, 1, 2 ];
+          for (i = 0; i < (board.length * numberOfPlayers); i += 1) {
+            j = randomNumber(board.colors.length + 1);
+            if (j === board.colors.length) {
+              cards[i] = {
+                type: "special"
+              }
+            } else {
+              cards[i] = {
+                type: board.colors[j],
+                multiplier: multipliers[randomNumber(multipliers.length)]
+              }
             }
           }
+          board.cards = cards;
         }
-        board.cards = cards;
-      }
-            
-      return function(args) {
-        var board = createBoard(args);
-        addCards(board);
-        return board;
-      }
-      
-    })();
-      
-    var makeGame = (function() {
-      
+
+        return function(params, numberOfPlayers) {
+          var board = createBoard(params);
+          addCards(board, numberOfPlayers);
+          return board;
+        }
+
+      })();
+
       var space = function(card, board, prev) {
         if (!prev) {
           prev = { position: this.position }
@@ -142,13 +142,13 @@
         return prev;
       }
       
-      return function(args) {
+      var createGame = function(params) {          
         var i, game = {};
-        game.board = args.board;
-        game.players = new Array(args.players.length);
-        for (i = 0; i < args.players.length; i++) {
+        game.board = makeBoard(params.board, params.players.length);
+        game.players = new Array(params.players.length);
+        for (i = 0; i < params.players.length; i++) {
           game.players[i] = {};
-          game.players[i].name = args.players[i];
+          game.players[i].name = params.players[i];
           game.players[i].position = -1;
           game.players[i].space = space;
         }
@@ -199,65 +199,72 @@
         return game;
       }
       
+      return createGame;
+      
     })();
 
-    var game = makeGame({
-      players: ["Black Widow", "Hawkeye"],
-      board: makeBoard({
-        numberOfSpaces: 100,
-        colors: ["black", "green", "orange", "purple", "blue", "red", "yellow", "silver", "gold"],
-        specials: ["shield", "loki", "hammer", "loki", "bow", "loki", "helmet", "loki", "gun", "loki"]
-      })
-    });
-        
-    var playerField = $("#playersTurn strong"), moveField = $("#lastMove strong"), pickCardButton = $("button")
-    playerField.html(game.currentPlayer().name);
-    pickCardButton.focus();
+    // main program
+    (function() {
+      
+      var game = avengerland.game = avengerland({
+        players: ["Black Widow", "Hawkeye"],
+        board: {
+          numberOfSpaces: 100,
+          colors: ["black", "green", "orange", "purple", "blue", "red", "yellow", "silver", "gold"],
+          specials: ["shield", "loki", "hammer", "loki", "bow", "loki", "helmet", "loki", "gun", "loki"]
+        }
+      });
 
-    $("p > a").click(function() {
-      $("#rules").toggleClass("hidden");
-      return false;
-    });
-    
-    pickCardButton.click(function() {
-      var won = game.move();
-      moveField.html(lastMove(game));
-      itemIndicator(game.lastMove.landedOn.item);
-      if (won) {
-        moveField.html(game.currentPlayer().name + " wins!");
-        pickCardButton.attr("disabled", true);
-      } else {
-        playerField.html(game.currentPlayer().name);
-        pickCardButton.focus();        
+      var playerField = $("#playersTurn strong"), moveField = $("#lastMove strong"), pickCardButton = $("button")
+
+      $("p > a").click(function() {
+        $("#rules").toggleClass("hidden");
+        return false;
+      });
+
+      playerField.html(game.currentPlayer().name);
+      pickCardButton.focus();
+
+      pickCardButton.click(function() {
+        var won = game.move();
+        moveField.html(lastMove(game));
+        itemIndicator(game.lastMove.landedOn.item);
+        if (won) {
+          moveField.html(game.currentPlayer().name + " wins!");
+          pickCardButton.attr("disabled", true);
+        } else {
+          playerField.html(game.currentPlayer().name);
+          pickCardButton.focus();        
+        }
+        return false;
+      });
+
+      function lastMove(game) {
+        var lastMove = game.lastMove.player + " picks ";
+        lastMove += game.lastMove.card.type === "special" ?
+          game.lastMove.card.type : game.lastMove.card.multiplier + " " + game.lastMove.card.type;
+        if (game.lastMove.startingPosition === game.lastMove.endingPosition) {
+          lastMove += " and stays at " + (game.lastMove.startingPosition + 1);
+        } else {
+          lastMove += " and moves from " + (game.lastMove.startingPosition + 1) + " to " + (game.lastMove.endingPosition + 1);
+        }
+        if (game.lastMove.earnsAnotherTurn) {
+          lastMove += " and gets another turn";
+        }      
+        if (game.lastMove.landedOn.item) {
+          lastMove += " (landed on " + game.lastMove.landedOn.item + ")";
+        }
+        return lastMove;
       }
-      return false;
-    });
-    
-    function lastMove(game) {
-      var lastMove = game.lastMove.player + " picks ";
-      lastMove += game.lastMove.card.type === "special" ?
-        game.lastMove.card.type : game.lastMove.card.multiplier + " " + game.lastMove.card.type;
-      if (game.lastMove.startingPosition === game.lastMove.endingPosition) {
-        lastMove += " and stays at " + (game.lastMove.startingPosition + 1);
-      } else {
-        lastMove += " and moves from " + (game.lastMove.startingPosition + 1) + " to " + (game.lastMove.endingPosition + 1);
+
+      function itemIndicator(item) {
+        if (item) {
+          $("#item").addClass(item)
+        } else {
+          $("#item").removeClass();
+        }      
       }
-      if (game.lastMove.earnsAnotherTurn) {
-        lastMove += " and gets another turn";
-      }      
-      if (game.lastMove.landedOn.item) {
-        lastMove += " (landed on " + game.lastMove.landedOn.item + ")";
-      }
-      return lastMove;      
-    }
-    
-    function itemIndicator(item) {
-      if (item) {
-        $("#item").addClass(item)
-      } else {
-        $("#item").removeClass();
-      }      
-    }
-    
+      
+    })();
   </script>
 </html>
