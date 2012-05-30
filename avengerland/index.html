@@ -33,21 +33,24 @@
       <p>
         Enjoy playing! -  Annabelle and Corgan, Avengerland Designers
       </p>
+    </div>    
+    <div id="board"></div>    
+    <div id="control">
+      <div id="playersTurn">
+        <label>
+          Player's turn:
+          <strong></strong>
+        </label>  
+      </div>
+      <div id="lastMove">
+        <label>
+          Last move:
+          <strong></strong>
+        </label>    
+      </div>
+      <button>Pick a card</button>
+      <div id="item"></div>      
     </div>
-    <div id="playersTurn">
-      <label>
-        Player's turn:
-        <strong></strong>
-      </label>  
-    </div>
-    <div id="lastMove">
-      <label>
-        Last move:
-        <strong></strong>
-      </label>    
-    </div>
-    <button>Pick a card</button>
-    <div id="item"></div>
   </body>
   <script>
     var avengerland = (function() {
@@ -146,7 +149,7 @@
         var i, game = {};
         game.board = makeBoard(params.board, params.players.length);
         game.players = new Array(params.players.length);
-        for (i = 0; i < params.players.length; i++) {
+        for (i = 0; i < params.players.length; i += 1) {
           game.players[i] = {};
           game.players[i].name = params.players[i];
           game.players[i].position = -1;
@@ -215,8 +218,20 @@
         }
       });
 
-      var playerField = $("#playersTurn strong"), moveField = $("#lastMove strong"), pickCardButton = $("button")
+      var i, boardElement = $("#board"), playerField = $("#playersTurn strong"), moveField = $("#lastMove strong"), pickCardButton = $("button"),
+        playerClasses = {
+          "Hawkeye": "hawkeye",
+          "Black Widow": "black-widow"
+        }
 
+      for (i = 0; i < game.board.length; i += 1) {
+        var space = game.board[i], spaceElement = $("<div/>").attr("id", "space-" + i).addClass("space").addClass(space.type);
+        if (space.item) {
+          spaceElement.addClass(space.item);
+        }
+        boardElement.append(spaceElement);
+      }
+      
       $("p > a").click(function() {
         $("#rules").toggleClass("hidden");
         return false;
@@ -226,8 +241,10 @@
       pickCardButton.focus();
 
       pickCardButton.click(function() {
-        var won = game.move();
+        var won = game.move(), playerClass = playerClasses[game.lastMove.player];
         moveField.html(lastMove(game));
+        $("#space-" + game.lastMove.startingPosition).removeClass(playerClass);        
+        $("#space-" + game.lastMove.endingPosition).addClass(playerClass);
         itemIndicator(game.lastMove.landedOn.item);
         if (won) {
           moveField.html(game.currentPlayer().name + " wins!");
@@ -238,7 +255,7 @@
         }
         return false;
       });
-
+      
       function lastMove(game) {
         var lastMove = game.lastMove.player + " picks ";
         lastMove += game.lastMove.card.type === "special" ?
