@@ -6,6 +6,87 @@ body {
   display: none;
 }
 
+#board {
+  float: left;
+  height: 340px;
+  width: 340px;
+  margin-right: 10px;
+}
+
+#board .space {
+  float: left;
+  height: 32px;
+  width: 32px;
+  border: 1px solid #777;
+  position: relative;
+}
+
+#board .space.black {
+  background-color: black;
+}
+
+#board .space.green {
+  background-color: green;
+}
+
+#board .space.orange {
+  background-color: orange;
+}
+
+#board .space.purple {
+  background-color: purple;
+}
+
+#board .space.blue {
+  background-color: blue;
+}
+
+#board .space.special {
+  background-color: #fff;
+}
+
+#board .space.special::after {
+  content: "S";
+  color: #333;  
+  position: absolute;
+  top: 7px;
+  left: 10px;
+}
+
+#board .space.red {
+  background-color: red;
+}
+
+#board .space.yellow {
+  background-color: yellow;
+}
+
+#board .space.silver {
+  background-color: silver;
+}
+
+#board .space.gold {
+  background-color: gold;
+}
+
+#board .space.black-widow::after {
+  content: "BW";
+  color: #777;  
+  position: absolute;  
+  top: 7px;
+  left: 3px;
+  z-index: 3;
+}
+
+#board .space.hawkeye::after {
+  content: "H";
+  color: #777;  
+  position: absolute;  
+  top: 7px;
+  left: 10px;
+  z-index: 2;
+}
+
 #playersTurn {
   margin: 10px;
 }
@@ -15,44 +96,40 @@ body {
 }
 
 button {
-  margin: 10px;
   font-size: 14px;
   height: 50px;
-  width: 120px;
+  width: 100px;
+  display: block;
 }
 
 #item {
-  margin-top: 10px;
-	height: 450px;
-	width: 450px;
-}
-
-.shield {
-	background-image: url(images/shield.jpg);
+  float: left;
+  margin-top: 20px;
+	height: 200px;
+	width: 200px;
   background-repeat: no-repeat;
 }
 
-.helmet {
+#item.shield {
+	background-image: url(images/shield.jpg);
+}
+
+#item.helmet {
 	background-image: url(images/helmet.jpg);
-  background-repeat: no-repeat;	
 }
 
-.hammer {
+#item.hammer {
 	background-image: url(images/hammer.jpg);
-  background-repeat: no-repeat;	
 }
 
-.bow {
+#item.bow {
 	background-image: url(images/bow.jpg);
-  background-repeat: no-repeat;	
 }
 
-.gun {
+#item.gun {
 	background-image: url(images/gun.jpg);
-  background-repeat: no-repeat;	
 }
 
-.loki {
+#item.loki {
 	background-image: url(images/loki.jpg);
-  background-repeat: no-repeat;	
 }
