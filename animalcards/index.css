@@ -1,0 +1,115 @@
+body {
+  font-family: Helvetica;
+}
+
+.hidden {
+  display: none;
+}
+
+#board {
+  float: left;
+  height: 170px;
+  width: 170px;
+  margin-right: 10px;
+}
+
+#board .card {
+  float: left;
+  height: 32px;
+  width: 32px;
+  border: 1px solid #333;
+  position: relative;
+}
+
+#board .card.turned-over {
+  background-color: #777;
+  z-index: 3;
+}
+
+#board .card.Rhino::after {
+  content: "R";
+  color: #777;  
+  position: absolute;  
+  top: 7px;
+  left: 10px;
+  z-index: 2;
+}
+
+#board .card.Jaguar::after {
+  content: "J";
+  color: #777;  
+  position: absolute;  
+  top: 7px;
+  left: 10px;
+  z-index: 2;
+}
+
+#board .card.Giraffe::after {
+  content: "G";
+  color: #777;  
+  position: absolute;  
+  top: 7px;
+  left: 10px;
+  z-index: 2;
+}
+
+#board .card.Monkey::after {
+  content: "M";
+  color: #777;  
+  position: absolute;  
+  top: 7px;
+  left: 10px;
+  z-index: 2;
+}
+
+#board .card.Cheetah::after {
+  content: "C";
+  color: #777;  
+  position: absolute;  
+  top: 7px;
+  left: 10px;
+  z-index: 2;
+}
+
+#playersTurn {
+  margin: 10px;
+}
+
+#lastMove {
+  margin: 10px;
+}
+
+button {
+  font-size: 14px;
+  height: 50px;
+  width: 100px;
+  display: block;
+}
+
+#animal {
+  float: left;
+  margin-top: 20px;
+	height: 200px;
+	width: 200px;
+  background-repeat: no-repeat;
+}
+
+#animal.Rhino {
+	background-image: url(images/rhino.png);
+}
+
+#animal.Jaguar {
+	background-image: url(images/jaguar.png);
+}
+
+#animal.Giraffe {
+	background-image: url(images/giraffe.png);
+}
+
+#animal.Monkey {
+	background-image: url(images/monkey.png);
+}
+
+#animal.Cheetah {
+	background-image: url(images/cheetah.png);
+}
