@@ -38,16 +38,16 @@
     <div id="board"></div>    
     <div id="control">
       <div id="score">
-        <label>
+        <label id="player-one">
           Player 1:
           <strong>0</strong>
         </label>
-        <label>
+        <label id="player-two">
           Player 2:
           <strong>0</strong>
         </label>        
       </div>
-      <div id="playersTurn">
+      <div id="players-turn">
         <label>
           Turn:
           <strong>Player 1</strong>
@@ -64,7 +64,8 @@
     return false;
   });
   
-  var i, j = 0, numberOfCards = 10, boardElement = $("#board"), pickCardButton = $("button"), animalElement = $("#animal"), animal, matches = 0, firstMatch, picking = false, pickListener = {};
+  var i, j = 0, numberOfCards = 10, boardElement = $("#board"), pickCardButton = $("button"), animalElement = $("#animal"), animal, matches = 0, firstMatch, picking = false, pickListener = {}, player = "Player 1", 
+    playersTurnElement = $("#players-turn strong"), playerOneScore = 0, playerTwoScore = 0, playerOneScoreElement = $("#player-one strong"), playerTwoScoreElement = $("#player-two strong");
   var animals = [ "Rhino", "Jaguar", "Giraffe", "Monkey", "Cheetah"] ;
   var board = new Array(numberOfCards);
   for (i = 0; i < numberOfCards; i+= 2) {
@@ -121,10 +122,19 @@
       if (matches == 2) {
         console.log("Won a point! Collecting pair...");
         matches = 0;
+        firstMatch = undefined;        
         picking = false;
         pickCardButton.attr("disabled", false);        
         animal = null;
         animalElement.removeClass();        
+        animals.splice(animals.indexOf(card), 1);
+        if (player === "Player 1") {
+          playerOneScore += 1;
+          playerOneScoreElement.html(playerOneScore);
+        } else {
+          playerTwoScore += 1;
+          playerTwoScoreElement.html(playerTwoScore);          
+        }
       }
       return true;
     } else {
@@ -133,6 +143,12 @@
       pickCardButton.attr("disabled", false);
       animal = null;
       animalElement.removeClass();
+      if (player === "Player 1") {
+        player = "Player 2";
+      } else {
+        player = "Player 1";
+      }
+      playersTurnElement.html(player);      
       return false;
     }
   };

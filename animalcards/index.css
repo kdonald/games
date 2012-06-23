@@ -71,11 +71,7 @@ body {
   z-index: 2;
 }
 
-#playersTurn {
-  margin: 10px;
-}
-
-#lastMove {
+#players-turn {
   margin: 10px;
 }
 
