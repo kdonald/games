@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Brevard Zoo Animal Cards</title>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <link rel="stylesheet" href="index.css" />
+    <meta name="description" content="A fun animal matching game that tests your memory."> 
+  </head>
+  <body>
+    <h1>Brevard Zoo Animal Cards</h1>
+    <h3>an ACD production (v1.0)</h3>
+    <p>If this is your first time playing, <a href="">read the rules</a>.
+    <div id="rules" class="hidden">
+      <p>
+        Brevard Zoo Animal Cards is a fun matching game that exercises your memory.
+      </p>
+      <p>
+        There is a board of ten cards.
+        Each card when turned over reveals an animal.
+        There are five distinct animals and a pair of cards for each animal.
+      </p>
+      <p>
+        The game starts when the board's cards are turned over and shuffled.
+        The first player draws a card from the pick 'em deck.
+        The card reveals an animal.
+        The player attempts to match the animal on the board.
+        If she finds a match she earns another turn.
+        If she matches the pair, she collects the pair and wins a point.
+        If she fails to match the pair, any previous match is turned back over and the next player gets a turn.
+      </p>
+      <p>
+        A player wins when she gets 3 points by matching 3 pairs of animals.
+      </p>
+      <p>
+        Enjoy playing! -  Annabelle and Corgan, Animal Card Designers
+      </p>
+    </div>    
+    <div id="board"></div>    
+    <div id="control">
+      <div id="score">
+        <span>Score:</span>
+        <label id="player-1">
+          <span class="name"></span>
+          <strong>0</strong>
+        </label>
+        <label id="player-2">
+          <span class="name"></span>
+          <strong>0</strong>
+        </label>
+      </div>
+      <div id="players-turn">
+        <label>
+          Turn:
+          <strong></strong>
+        </label>  
+      </div>
+      <button>Pick a card</button>
+      <div id="animal"></div>      
+    </div>
+  </body>
+  <script>
+  
+  $("p > a").click(function() {
+    $("#rules").toggleClass("hidden");
+    return false;
+  });
+  
+  var animalcards = (function() {
+    
+    var arrays = {};
+    arrays.shuffle = function(array) {
+      var tmp, current, top = array.length;
+      if (top) while(--top) {
+        current = Math.floor(Math.random() * (top + 1));
+        tmp = array[current];
+        array[current] = array[top];
+        array[top] = tmp;
+      }
+      return array;
+    }
+    
+    var map = (function() {
+      var mapPrototype = {
+         get: function(key) {
+          if (!this.data.hasOwnProperty(key)) {
+            this.data[key] = this.newValue(key);
+          }
+          return this.data[key];
+        }
+      }
+      return {
+        create: function(args) {
+          return Object.create(mapPrototype, {
+            data: { value: {} },
+            newValue: { value: args.newValue }
+          });
+        },
+        ofArrays: function() {
+          return this.create({
+            newValue: function() { return []; }      
+          });
+        }
+      }      
+    })();
+        
+    function makeObservable(obj) {
+      obj.listeners = map.ofArrays();
+      obj.on = function(event, listener) {
+        this.listeners.get(event).push(listener);
+        return this;       
+      }
+      obj.trigger = function(event, args) {
+        var listeners = this.listeners.get(event);
+        listeners.forEach(function(listener) {
+          listener(args);
+        });
+        return this;        
+      }
+      return obj;
+    }
+    
+    function card(animal) {
+      return makeObservable({ animal: animal, collected: false });
+    }
+    
+    function createBoard(animals, cardsPerAnimal) {
+      var i, j = 0, k, board = new Array(animals.length * cardsPerAnimal);
+      for (i = 0; i < board.length; i += cardsPerAnimal) {
+        for (k = i; k < i + cardsPerAnimal; k += 1) {
+          board[k] = card(animals[j]);
+        }
+        j += 1;
+      }
+      arrays.shuffle(board);
+      board.animals = animals;
+      board.cardsPerAnimal = cardsPerAnimal;
+      return board;
+    }
+    
+    function createPlayers(playerNames) {
+      var i, players = new Array(playerNames.length), player;
+      for (i = 0; i < playerNames.length; i += 1) {
+        player = {};
+        player.number = i + 1;
+        player.name = playerNames[i];
+        player.score = 0;
+        players[i] = player;
+      }
+      return players;
+    }
+    
+    return function(args) {
+      var i, game = {};
+      game.board = createBoard(args.animals, args.cardsPerAnimal);
+      game.players = createPlayers(args.players);
+      game.animals = args.animals.slice();      
+      game.animal = function() {
+        if (this.matching) {
+          throw new Error("Finish matching the current animal before picking another one");
+        }
+        return this.animals[Math.floor(Math.random() * this.animals.length)];        
+      }
+      game.startMatching = function(animal) {
+        this.matching = animal;
+        this.picks = [];
+        this.matches = [];  
+        this.trigger("matching-start");
+      }
+      game.pick = function(card) {
+        if (!this.matching || this.matched(card) || this.changingPlayers || card.collected) {
+          return false;
+        }
+        this.picks.push(card);
+        card.trigger("display");
+        if (this.matching === card.animal) {
+          this.matches.push(card);
+          if (this.matches.length === this.board.cardsPerAnimal) {
+            this.currentPlayer.score += 1;
+            this.matches.forEach(function(card) {
+              card.collected = true;
+              card.trigger("collected");
+            });
+            this.animals.splice(this.animals.indexOf(card.animal), 1);            
+            this.endMatching();
+            this.trigger("score");
+          }
+          return true;
+        } else {
+          this.changingPlayers = true;
+          setTimeout(function() {
+            this.picks.forEach(function(card) {
+              card.trigger("hide");
+            });
+            this.endMatching();
+            this.nextPlayer();
+            delete this.changingPlayers;
+          }.bind(this), 1500);
+          return false;
+        }
+      }
+      game.matched = function(card) {
+        return this.matches.indexOf(card) != -1;
+      }
+      game.endMatching = function() {
+        delete this.matches;
+        delete this.picks;      
+        delete this.matching;
+        this.trigger("matching-end");
+      }
+      game.nextPlayer = function() {
+        var next = this.currentPlayer.number < this.players.length ? this.currentPlayer.number : 0;
+        this.currentPlayer = this.players[next];
+        this.trigger("player-changed");
+      }
+      game.currentPlayer = game.players[0];
+      makeObservable(game);
+      return game;
+    }
+    
+  })();
+
+  (function() {
+    
+    var game = animalcards.game = animalcards({
+      animals: [ "Rhino", "Jaguar", "Giraffe", "Monkey", "Cheetah"],
+      players: [ "Annabelle", "Corgan"],
+      cardsPerAnimal: 2
+    });
+    
+    var i, boardElement = $("#board"), pickCardButton = $("button"), animalElement = $("#animal"), playersTurnField = $("#players-turn strong"),
+      playerScoreFields = new Array(game.players.length);
+    
+    function makeCardElement(card) {
+      var cardElement = $("<div/>").addClass("card").addClass("turned-over");
+      cardElement.click(function() {
+        game.pick(card);
+        return false;
+      });
+      card.on("display", function() {
+        cardElement.removeClass("turned-over");
+        cardElement.addClass(card.animal);        
+      });
+      card.on("hide", function() {
+        cardElement.addClass("turned-over");
+        cardElement.removeClass(card.animal);        
+      });
+      return cardElement;
+    }
+        
+    for (i = 0; i < game.board.length; i += 1) {
+      boardElement.append(makeCardElement(game.board[i]));
+    }
+
+    for (i = 0; i < game.players.length; i++) {
+      var player = game.players[i], label = $("#player-" + player.number);
+      label.find("span").html(player.name + ":");
+      playerScoreFields[i] = label.find("strong");
+    }
+    
+    pickCardButton.click(function() {
+      var animal = game.animal();
+      animalElement.addClass(animal);
+      game.startMatching(animal);      
+      return false;
+    });
+    
+    game.on("matching-start", function() {
+      pickCardButton.attr("disabled", true);
+    });
+    
+    game.on("matching-end", function() {
+      if (game.animals.length) {
+        pickCardButton.attr("disabled", false);
+        animalElement.removeClass();
+        pickCardButton.focus();        
+      }
+    });
+
+    playersTurnField.html(game.currentPlayer.name);
+    game.on("player-changed", function() {
+      playersTurnField.html(game.currentPlayer.name);      
+    });
+    
+    game.on("score", function() {
+      playerScoreFields[game.currentPlayer.number - 1].html(game.currentPlayer.score);
+    });
+    
+    pickCardButton.focus();
+    
+  })();  
+  </script>
+</html>
