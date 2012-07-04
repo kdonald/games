@@ -7,9 +7,8 @@ body {
 }
 
 #board {
-  background-color: #eee;
   float: left;
-  width: 185px;
+  width: 200px;
   margin-right: 10px;
 }
 
