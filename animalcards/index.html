@@ -38,19 +38,20 @@
     <div id="board"></div>    
     <div id="control">
       <div id="score">
-        <label id="player-one">
-          Player 1:
+        <span>Score:</span>
+        <label id="player-1">
+          <span class="name"></span>
           <strong>0</strong>
         </label>
-        <label id="player-two">
-          Player 2:
+        <label id="player-2">
+          <span class="name"></span>
           <strong>0</strong>
-        </label>        
+        </label>
       </div>
       <div id="players-turn">
         <label>
           Turn:
-          <strong>Player 1</strong>
+          <strong></strong>
         </label>  
       </div>
       <button>Pick a card</button>
@@ -64,104 +65,228 @@
     return false;
   });
   
-  var i, j = 0, numberOfCards = 10, boardElement = $("#board"), pickCardButton = $("button"), animalElement = $("#animal"), animal, matches = 0, firstMatch, picking = false, pickListener = {}, player = "Player 1", 
-    playersTurnElement = $("#players-turn strong"), playerOneScore = 0, playerTwoScore = 0, playerOneScoreElement = $("#player-one strong"), playerTwoScoreElement = $("#player-two strong");
-  var animals = [ "Rhino", "Jaguar", "Giraffe", "Monkey", "Cheetah"] ;
-  var board = new Array(numberOfCards);
-  for (i = 0; i < numberOfCards; i+= 2) {
-    board[i] = animals[j];    
-    board[i+1] = animals[j];
-    j += 1;
-  }
-
-  shuffle(board);
-  
-  for (i = 0; i < board.length; i += 1) {
-    boardElement.append(makeCardElement(board[i], i));
-  }
-  
-  function makeCardElement(card, i) {
-    var cardElement = $("<div/>").attr("id", "card-" + (i+1)).addClass("card").addClass("turned-over");
-    cardElement.click(function() {
-      if (!picking) {
-        return false;
+  var animalcards = (function() {
+    
+    var arrays = {};
+    arrays.shuffle = function(array) {
+      var tmp, current, top = array.length;
+      if (top) while(--top) {
+        current = Math.floor(Math.random() * (top + 1));
+        tmp = array[current];
+        array[current] = array[top];
+        array[top] = tmp;
       }
-      var self = $(this)
-      self.removeClass("turned-over");
-      self.addClass(card);
-      if (!pickListener.onPick(card, cardElement)) {
-        setTimeout(function() {
-          self.addClass("turned-over");
-          self.removeClass(card); 
-          if (firstMatch) {
-            firstMatch.removeClass();
-            firstMatch.addClass("card");            
-            firstMatch.addClass("turned-over");
-          }         
-        }, 2000)
-      }
-      return false;
-    });
-    return cardElement;
-  }
-
-  pickCardButton.click(function() {
-    animal = animals[Math.floor(Math.random() * animals.length)];
-    animalElement.removeClass();
-    animalElement.addClass(animal);    
-    picking = true;
-    pickCardButton.attr("disabled", true);
-    return false;
-  });
-
-  pickListener.onPick = function(card, cardElement) {
-    if (card === animal) {
-      console.log("Matched", card);      
-      matches += 1;
-      firstMatch = cardElement;
-      if (matches == 2) {
-        console.log("Won a point! Collecting pair...");
-        matches = 0;
-        firstMatch = undefined;        
-        picking = false;
-        pickCardButton.attr("disabled", false);        
-        animal = null;
-        animalElement.removeClass();        
-        animals.splice(animals.indexOf(card), 1);
-        if (player === "Player 1") {
-          playerOneScore += 1;
-          playerOneScoreElement.html(playerOneScore);
-        } else {
-          playerTwoScore += 1;
-          playerTwoScoreElement.html(playerTwoScore);          
+      return array;
+    }
+    
+    var map = (function() {
+      var mapPrototype = {
+         get: function(key) {
+          if (!this.data.hasOwnProperty(key)) {
+            this.data[key] = this.newValue(key);
+          }
+          return this.data[key];
         }
       }
-      return true;
-    } else {
-      matches = 0;
-      picking = false;
-      pickCardButton.attr("disabled", false);
-      animal = null;
-      animalElement.removeClass();
-      if (player === "Player 1") {
-        player = "Player 2";
-      } else {
-        player = "Player 1";
+      return {
+        create: function(args) {
+          return Object.create(mapPrototype, {
+            data: { value: {} },
+            newValue: { value: args.newValue }
+          });
+        },
+        ofArrays: function() {
+          return this.create({
+            newValue: function() { return []; }      
+          });
+        }
+      }      
+    })();
+        
+    function makeObservable(obj) {
+      obj.listeners = map.ofArrays();
+      obj.on = function(event, listener) {
+        this.listeners.get(event).push(listener);
+        return this;       
       }
-      playersTurnElement.html(player);      
-      return false;
+      obj.trigger = function(event, args) {
+        var listeners = this.listeners.get(event);
+        listeners.forEach(function(listener) {
+          listener(args);
+        });
+        return this;        
+      }
+      return obj;
     }
-  };
     
-  function shuffle(array) {
-    var tmp, current, top = array.length;
-    if (top) while(--top) {
-      current = Math.floor(Math.random() * (top + 1));
-      tmp = array[current];
-      array[current] = array[top];
-      array[top] = tmp;
+    function card(animal) {
+      return makeObservable({ animal: animal, collected: false });
     }
-    return array;
-  }  
+    
+    function createBoard(animals, cardsPerAnimal) {
+      var i, j = 0, k, board = new Array(animals.length * cardsPerAnimal);
+      for (i = 0; i < board.length; i += cardsPerAnimal) {
+        for (k = i; k < i + cardsPerAnimal; k += 1) {
+          board[k] = card(animals[j]);
+        }
+        j += 1;
+      }
+      arrays.shuffle(board);
+      board.animals = animals;
+      board.cardsPerAnimal = cardsPerAnimal;
+      return board;
+    }
+    
+    function createPlayers(playerNames) {
+      var i, players = new Array(playerNames.length), player;
+      for (i = 0; i < playerNames.length; i += 1) {
+        player = {};
+        player.number = i + 1;
+        player.name = playerNames[i];
+        player.score = 0;
+        players[i] = player;
+      }
+      return players;
+    }
+    
+    return function(args) {
+      var i, game = {};
+      game.board = createBoard(args.animals, args.cardsPerAnimal);
+      game.players = createPlayers(args.players);
+      game.animals = args.animals.slice();      
+      game.animal = function() {
+        if (this.matching) {
+          throw new Error("Finish matching the current animal before picking another one");
+        }
+        return this.animals[Math.floor(Math.random() * this.animals.length)];        
+      }
+      game.startMatching = function(animal) {
+        this.matching = animal;
+        this.picks = [];
+        this.matches = [];  
+        this.trigger("matching-start");
+      }
+      game.pick = function(card) {
+        if (!this.matching || this.matched(card) || this.changingPlayers || card.collected) {
+          return false;
+        }
+        this.picks.push(card);
+        card.trigger("display");
+        if (this.matching === card.animal) {
+          this.matches.push(card);
+          if (this.matches.length === this.board.cardsPerAnimal) {
+            this.currentPlayer.score += 1;
+            this.matches.forEach(function(card) {
+              card.collected = true;
+              card.trigger("collected");
+            });
+            this.animals.splice(this.animals.indexOf(card.animal), 1);            
+            this.endMatching();
+            this.trigger("score");
+          }
+          return true;
+        } else {
+          this.changingPlayers = true;
+          setTimeout(function() {
+            this.picks.forEach(function(card) {
+              card.trigger("hide");
+            });
+            this.endMatching();
+            this.nextPlayer();
+            delete this.changingPlayers;
+          }.bind(this), 1500);
+          return false;
+        }
+      }
+      game.matched = function(card) {
+        return this.matches.indexOf(card) != -1;
+      }
+      game.endMatching = function() {
+        delete this.matches;
+        delete this.picks;      
+        delete this.matching;
+        this.trigger("matching-end");
+      }
+      game.nextPlayer = function() {
+        var next = this.currentPlayer.number < this.players.length ? this.currentPlayer.number : 0;
+        this.currentPlayer = this.players[next];
+        this.trigger("player-changed");
+      }
+      game.currentPlayer = game.players[0];
+      makeObservable(game);
+      return game;
+    }
+    
+  })();
+
+  (function() {
+    
+    var game = animalcards.game = animalcards({
+      animals: [ "Rhino", "Jaguar", "Giraffe", "Monkey", "Cheetah"],
+      players: [ "Annabelle", "Corgan"],
+      cardsPerAnimal: 2
+    });
+    
+    var i, boardElement = $("#board"), pickCardButton = $("button"), animalElement = $("#animal"), playersTurnField = $("#players-turn strong"),
+      playerScoreFields = new Array(game.players.length);
+    
+    function makeCardElement(card) {
+      var cardElement = $("<div/>").addClass("card").addClass("turned-over");
+      cardElement.click(function() {
+        game.pick(card);
+        return false;
+      });
+      card.on("display", function() {
+        cardElement.removeClass("turned-over");
+        cardElement.addClass(card.animal);        
+      });
+      card.on("hide", function() {
+        cardElement.addClass("turned-over");
+        cardElement.removeClass(card.animal);        
+      });
+      return cardElement;
+    }
+        
+    for (i = 0; i < game.board.length; i += 1) {
+      boardElement.append(makeCardElement(game.board[i]));
+    }
+
+    for (i = 0; i < game.players.length; i++) {
+      var player = game.players[i], label = $("#player-" + player.number);
+      label.find("span").html(player.name + ":");
+      playerScoreFields[i] = label.find("strong");
+    }
+    
+    pickCardButton.click(function() {
+      var animal = game.animal();
+      animalElement.addClass(animal);
+      game.startMatching(animal);      
+      return false;
+    });
+    
+    game.on("matching-start", function() {
+      pickCardButton.attr("disabled", true);
+    });
+    
+    game.on("matching-end", function() {
+      if (game.animals.length) {
+        pickCardButton.attr("disabled", false);
+        animalElement.removeClass();
+        pickCardButton.focus();        
+      }
+    });
+
+    playersTurnField.html(game.currentPlayer.name);
+    game.on("player-changed", function() {
+      playersTurnField.html(game.currentPlayer.name);      
+    });
+    
+    game.on("score", function() {
+      playerScoreFields[game.currentPlayer.number - 1].html(game.currentPlayer.score);
+    });
+    
+    pickCardButton.focus();
+    
+  })();  
   </script>
 </html>
