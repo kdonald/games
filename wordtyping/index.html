@@ -282,18 +282,22 @@
     return true;
   }
 
-  var startButton = $("button"), boardElement = $("#board");
+  var startButton = $("button"), boardElement = $("#board"), changingWord = false;
 
-  startButton.click(function () {
+  startButton.click(function() {
     $(this).remove();
     boardElement.html(words.letters());
   });
   
   $(document).keypress(function(e) {
+    if (changingWord) {
+      return true;
+    }
     var typed = String.fromCharCode(e.which);
     if (typed.toLowerCase() === words.letter()) {
       boardElement.find("#letter-" + words.currentLetter).addClass("matched");
       if (words.lastLetter()) {
+        changingWord = true;
         setTimeout(function() {
           if (words.next()) {
             boardElement.html(words.letters());
@@ -309,11 +313,13 @@
             boardElement.html(endSet);
             nextSetButton.focus();         
           }
+          changingWord = false;
         }, 1000);
       } else {
         words.currentLetter += 1;        
       }
     }
+    return true;
   });
 
   words.nextSet();
