@@ -1,0 +1,21 @@
+body {
+  font-family: Helvetica;
+}
+
+.hidden {
+  display: none;
+}
+
+#board {
+  float: left;
+}
+
+#board .tile {
+  border: 1px solid #333;  
+  float: left;
+  height: 64px;
+  width: 64px;
+  line-height: 64px;
+  text-align: center;  
+  margin: 4px;  
+}

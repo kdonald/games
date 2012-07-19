@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Family Game Night Scrabble Flash</title>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <link rel="stylesheet" href="index.css" />
+    <meta name="description" content="A fun animal matching game that tests your memory."> 
+  </head>
+  <body>
+    <h1>Family Game Night Scrabble Flash</h1>
+    <h3>an ACD production (v1.0)</h3>
+    <p>If this is your first time playing, <a href="">read the rules</a>.
+    <div id="rules" class="hidden">
+      <p>
+        Scrabble Flash is a game where the players make words using 5 electronic letter tiles.
+        Alternating between teams, each player takes a turn picking what word they can make.
+        The player then arranges the tiles needed to make that word.
+        The team gets 3 points for making a word with 3 letters, 4 points by making a word with 4 letters, or 5 points by making a word with 5 letters.
+        The first player to reach a score of 25 points or more is the winner.
+      </p>
+      <p>
+        Enjoy playing! -  Annabelle and Corgan, Scrabble Flash Designers        
+      </p>
+    </div>    
+    <div id="board">
+      <div class="tile">R</div>
+      <div class="tile">S</div>
+      <div class="tile">T</div>
+      <div class="tile">E</div>
+      <div class="tile">A</div>                    
+    </div>    
+    <div id="control">
+      <div id="score">
+        <span>Score:</span>
+        <label id="player-1">
+          <span class="name">Corgan</span>
+          <strong>0</strong>
+        </label>
+        <label id="player-2">
+          <span class="name">Annabelle</span>
+          <strong>0</strong>
+        </label>
+      </div>
+      <div id="players-turn">
+        <label>
+          Turn:
+          <strong>Corgan</strong>
+        </label>  
+      </div>
+    </div>
+  </body>
+  <script>
+  
+  $("p > a").click(function() {
+    $("#rules").toggleClass("hidden");
+    return false;
+  });
+  
+  </script>
+</html>
