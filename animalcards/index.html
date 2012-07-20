@@ -167,6 +167,7 @@
         this.trigger("matching-start");
       }
       game.pick = function(card) {
+        var self = this;        
         if (!this.matching || this.matched(card) || this.changingPlayers || card.collected) {
           return false;
         }
@@ -188,13 +189,13 @@
         } else {
           this.changingPlayers = true;
           setTimeout(function() {
-            this.picks.forEach(function(card) {
+            self.picks.forEach(function(card) {
               card.trigger("hide");
             });
-            this.endMatching();
-            this.nextPlayer();
-            delete this.changingPlayers;
-          }.bind(this), 1500);
+            self.endMatching();
+            self.nextPlayer();
+            delete self.changingPlayers;
+          }, 1500);
           return false;
         }
       }
@@ -222,8 +223,8 @@
   (function() {
     
     var game = animalcards.game = animalcards({
-      animals: [ "Rhino", "Jaguar", "Giraffe", "Monkey", "Cheetah"],
-      players: [ "Annabelle", "Corgan"],
+      animals: [ "Rhino", "Jaguar", "Giraffe", "Monkey", "Cheetah" ],
+      players: [ "Annabelle", "Corgan" ],
       cardsPerAnimal: 2
     });
     
@@ -285,6 +286,7 @@
       playerScoreFields[game.currentPlayer.number - 1].html(game.currentPlayer.score);
     });
     
+    pickCardButton.attr("disabled", false);
     pickCardButton.focus();
     
   })();  
