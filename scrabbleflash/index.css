@@ -39,5 +39,8 @@ body {
 #control {
   clear: both;
   padding-top: 16px;
-  margin: 16px;
+}
+
+#players-turn {
+  margin-top: 8px;
 }

@@ -39,19 +39,19 @@
     <div id="control">
       <div id="score">
         <span>Score:</span>
-        <label id="player-1">
-          <span class="name">Corgan</span>
+        <label id="player-0">
+          <span class="name"></span>
           <strong>0</strong>
         </label>
-        <label id="player-2">
-          <span class="name">Annabelle</span>
+        <label id="player-1">
+          <span class="name"></span>
           <strong>0</strong>
         </label>
       </div>
       <div id="players-turn">
         <label>
           Turn:
-          <strong>Corgan</strong>
+          <strong></strong>
         </label>  
       </div>
     </div>
@@ -62,69 +62,200 @@
     $("#rules").toggleClass("hidden");
     return false;
   });
-  
-  var game = {};
-  game.word = new Array(5);
-  
-  var i, slots = $(".slot"), slot;
-  slots.on("dragstart", function(e) {
-    e.originalEvent.dataTransfer.setData('Text', this.id);      
-  });  
-  slots.on("dragover", function(e) {
-    if (e.preventDefault) {
-      e.preventDefault();
-    }
-    $(this).addClass("over");
-    return false;
-  });
-  slots.on("dragleave", function(e) {
-    $(this).removeClass("over");
-  });
-  slots.on("drop", function(e) {
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }
-    var from = $("#" + e.originalEvent.dataTransfer.getData("Text")), to = $(this), tmp;
-    if (to.hasClass("tile")) {
-      // swap
-      if (from.attr("id").slice(0, 12) === "word-letter-") {
-        var index = parseInt(from.attr("id").slice(12));
-        game.word[index] = to.text();         
+    
+  var scrabbleflash = (function() {
+
+    var map = (function() {
+      var mapPrototype = {
+         get: function(key) {
+          if (!this.data.hasOwnProperty(key)) {
+            this.data[key] = this.newValue(key);
+          }
+          return this.data[key];
+        }
       }
-      if (to.attr("id").slice(0, 12) === "word-letter-") {
-        var index = parseInt(to.attr("id").slice(12));
-        game.word[index] = from.text();         
+      return {
+        create: function(args) {
+          return Object.create(mapPrototype, {
+            data: { value: {} },
+            newValue: { value: args.newValue }
+          });
+        },
+        ofArrays: function() {
+          return this.create({
+            newValue: function() { return []; }      
+          });
+        }
       }      
-      tmp = from.text();
-      from.text(to.text());
-      to.text(tmp);
-    } else {
-      if (from.attr("id").slice(0, 12) === "word-letter-") {
-        var index = parseInt(from.attr("id").slice(12));
-        delete game.word[index];
+    })();
+        
+    function makeObservable(obj) {
+      obj.listeners = map.ofArrays();
+      obj.on = function(event, listener) {
+        this.listeners.get(event).push(listener);
+        return this;       
       }
-      if (to.attr("id").slice(0, 12) === "word-letter-") {
-        var index = parseInt(to.attr("id").slice(12));
-        game.word[index] = from.text();         
-      }      
-      to.addClass("tile");
-      to.attr("draggable", true);
-      to.text(from.text());
-      from.text("");
-      from.removeClass("tile");      
-      from.removeAttr("draggable");      
+      obj.trigger = function(event, args) {
+        var listeners = this.listeners.get(event);
+        listeners.forEach(function(listener) {
+          listener(args);
+        });
+        return this;        
+      }
+      return obj;
     }
-    to.removeClass("over");    
-    return false;
-  });
+    
+    function createPlayers(playerNames) {
+      var i, players = new Array(playerNames.length), player;
+      for (i = 0; i < playerNames.length; i += 1) {
+        player = {};
+        player.number = i;
+        player.name = playerNames[i];
+        player.score = 0;
+        players[i] = player;
+      }
+      return players;
+    }
+        
+    return function(args) {
+      var i, game = {};
+      game.players = createPlayers(args.players);
+      game.board = new Array(5);
+      game.submit = function() {
+        if (this.winner) {
+          return false;
+        }
+        var word = new Array(), i, letter; 
+        for (i = 0; i < this.board.length; i++) {
+          letter = this.board[i];
+          if (letter) {
+            word.push(letter);
+          } else {
+            break;
+          }
+        }
+        if (word.length >= 3) {
+          this.judge(word, function(correct) {
+            if (correct) {
+              game.currentPlayer.score += word.length;
+              this.trigger("score");
+              if (game.currentPlayer.score >= 25) {
+                this.winner = true;
+                this.trigger("winner");
+              } else {
+                this.nextPlayer();
+              }        
+            } else {
+              this.nextPlayer();
+            }
+          });
+        } else {
+          throw new Error("Must be 3, 4, or 5 letters to submit");
+        }
+      }
+      game.judge = function(word, callback) {
+        callback.call(this, true);
+      }
+      game.nextPlayer = function() {
+        var next = this.currentPlayer.number < (this.players.length - 1) ? this.currentPlayer.number + 1 : 0;
+        this.currentPlayer = this.players[next];
+        this.trigger("player-changed");        
+      }
+      game.currentPlayer = game.players[0]; 
+      makeObservable(game);
+      return game;
+    }
+  })();
   
-  $(document).keypress(function(e) {
-    if (e.which === 13) {
-      console.log("Enter pressed");
-      console.log(game.word);
+  (function() {
+    // main program
+    var game = scrabbleflash.game = scrabbleflash({
+      players: [ "Annabelle", "Corgan" ]
+    });
+    
+    var i, slots = $(".slot"), slot, playerScoreFields = new Array(game.players.length), playersTurnField = $("#players-turn strong");
+
+    for (i = 0; i < game.players.length; i++) {
+      var player = game.players[i], label = $("#player-" + player.number);
+      label.find("span").html(player.name + ":");
+      playerScoreFields[i] = label.find("strong");
+    }
+    
+    slots.on("dragstart", function(e) {
+      e.originalEvent.dataTransfer.setData('Text', this.id);      
+    });  
+    slots.on("dragover", function(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      $(this).addClass("over");
       return false;
-    }
-    return true;
-  });
+    });
+    slots.on("dragleave", function(e) {
+      $(this).removeClass("over");
+    });
+    slots.on("drop", function(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      var from = $("#" + e.originalEvent.dataTransfer.getData("Text")), to = $(this), tmp;
+      if (to.hasClass("tile")) {
+        // swap
+        if (from.attr("id").slice(0, 12) === "word-letter-") {
+          var index = parseInt(from.attr("id").slice(12));
+          game.board[index] = to.text();         
+        }
+        if (to.attr("id").slice(0, 12) === "word-letter-") {
+          var index = parseInt(to.attr("id").slice(12));
+          game.board[index] = from.text();         
+        }      
+        tmp = from.text();
+        from.text(to.text());
+        to.text(tmp);
+      } else {
+        if (from.attr("id").slice(0, 12) === "word-letter-") {
+          var index = parseInt(from.attr("id").slice(12));
+          delete game.board[index];
+        }
+        if (to.attr("id").slice(0, 12) === "word-letter-") {
+          var index = parseInt(to.attr("id").slice(12));
+          game.board[index] = from.text();         
+        }      
+        to.addClass("tile");
+        to.attr("draggable", true);
+        to.text(from.text());
+        from.text("");
+        from.removeClass("tile");      
+        from.removeAttr("draggable");      
+      }
+      to.removeClass("over");    
+      return false;
+    });
+
+    $(document).keypress(function(e) {
+      if (e.which === 13) {
+        game.submit();
+        return false;
+      }
+      return true;
+    });
+    
+    game.on("score", function() {
+      playerScoreFields[game.currentPlayer.number].html(game.currentPlayer.score);      
+    });
+
+    playersTurnField.html(game.currentPlayer.name);    
+    game.on("player-changed", function() {
+      playersTurnField.html(game.currentPlayer.name);            
+    });
+    
+    game.on("winner", function() {
+      console.log("winner");
+      playersTurnField.html(game.currentPlayer.name + " wins!");            
+    });
+    
+  })();
+  
+
   </script>
 </html>
