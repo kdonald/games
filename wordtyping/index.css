@@ -1,0 +1,26 @@
+body {
+  font-family: Helvetica;
+}
+
+.hidden {
+  display: none;
+}
+
+#theme {
+  border-bottom: 1px solid #777;
+  margin-bottom: 8px;
+  width: 128px;
+}
+
+#board span.letter {
+  font-size: 3.0em;
+}
+
+button {
+  margin-top: 8px;
+  font-size: 1.5em;
+}
+
+span.matched {
+  color: red;
+}

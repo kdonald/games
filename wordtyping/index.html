@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sight Word Typing</title>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <link rel="stylesheet" href="index.css" />
+    <meta name="description" content="A fun game that teaches you to read and type."> 
+  </head>
+  <body>
+    <h1>Sight Word Typing</h1>
+    <h3>an ACD production (v1.0)</h3>
+    <p>If this is your first time playing, <a href="">read the rules</a>.
+    <div id="rules" class="hidden">
+      <p>
+        Word Typing is a game that teaches you to read words and type them using the computer.
+        The player wins when he or she has typed in all the words in the set.
+      </p>
+      <p>
+        Enjoy playing! -  Annabelle and Corgan, Sight Word Typing        
+      </p>
+    </div>
+    <h3 id="theme"></h3>
+    <button>Start Game</button>
+    <div id="board"></div>
+  </body>
+  <script>
+    
+  $("p > a").click(function() {
+    $("#rules").toggleClass("hidden");
+    return false;
+  });
+
+  // 3 letter words (a)
+  
+  var am = {
+    name: "am",
+    words: [ "jam", "ham" ]
+  }
+  
+  var an = {
+    name: "an",
+    words: [ "can", "fan", "ran", "ban", "man", "van", "pan" ]
+  }
+  
+  var ap = {
+    name: "ap",
+    words: [ "cap", "tap", "gap", "map" ]
+  }
+  
+  var at = {
+    name: "at",
+    words: [ "cat", "sat", "bat", "fat", "pat", "mat", "rat", "hat" ]
+  }
+
+  var ag = {
+    name: "ag",
+    words: [ "bag", "lag", "nag", "rag", "sag", "tag" ]
+  }
+  
+  var ab = {
+    name: "ab",
+    words: [ "cab", "jab", "tab" ]
+  }
+  
+  var ax = {
+    name: "ax",
+    words: [ "max", "fax", "tax", "wax" ]
+  }
+  
+  // 3 letter words (i)
+  
+  var it = {
+    name: "it",
+    words: [ "bit", "fit", "hit", "kit", "pit", "sit" ]
+  }
+
+  var inSet = {
+    name: "in",
+    words: [ "bin", "fin", "pin", "tin", "win" ]
+  }
+
+  var ig = {
+    name: "ig",
+    words: [ "big", "dig", "jig", "rig" ]
+  }
+
+  var ip = {
+    name: "ip",
+    words: [ "dip", "hip", "lip", "sip", "tip", "zip" ]
+  }
+  
+  var id = {
+    name: "id",
+    words: [ "bid", "did", "hid", "lid", "mid", "rid" ]
+  }
+  
+  var ib = {
+    name: "ib",
+    words: [ "bib", "nib", "rib" ]
+  }
+  
+  var im = {
+    name: "im",
+    words: [ "him", "dim", "rim" ]
+  }
+  
+  var is = {
+    name: "is",
+    words: [ "his" ]
+  }
+  
+  var ix = {
+    name: "ix",
+    words: [ "fix", "mix" ]
+  }  
+
+  // 3 letter words (o)
+  
+  var ot = {
+    name: "ot",
+    words: [ "hot", "pot", "cot", "dot", "got", "lot", "not", "rot" ]
+  }
+  
+  var op = {
+    name: "op",
+    words: [ "cop", "hop", "pop", "top" ]
+  }
+  
+  var ob = {
+    name: "ob",
+    words: [ "bob", "job", "mob", "sob" ]
+  }
+  
+  var od = {
+    name: "od",
+    words: [ "pod", "nod", "rod" ]
+  }
+  
+  var og = {
+    name: "og",
+    words: [ "fog", "jog", "log", "dog" ]
+  }
+
+  var or = {
+    name: "or",
+    words: [ "for" ]
+  }
+
+  // 3 letter words (e)
+  
+  var en = {
+    name: "en",
+    words: [ "ten", "men", "hen" ]
+  }
+  
+  var et = {
+    name: "et",
+    words: [ "pet", "met", "wet", "let", "get" ]
+  }
+  
+  var ed = {
+    name: "ed",
+    words: [ "bed", "red" ]
+  }
+  
+  var eg = {
+    name: "eg",
+    words: [ "leg" ]
+  }
+  
+  // 3 letter words (u)
+
+  var ub = {
+    name: "ub",
+    words: [ "tub", "rub" ]
+  }
+  
+  var ud = {
+    name: "ud",
+    words: [ "bud", "mud" ]
+  }
+
+  var ug = {
+    name: "ug",
+    words: [ "bug", "hug" ]
+  }
+  
+  var um = {
+    name: "um",
+    words: [ "gum", "hum" ]
+  }
+  
+  var un = {
+    name: "un",
+    words: [ "gun", "bun", "sun", "fun", "run" ]
+  }
+  
+  var up = {
+    name: "up",
+    words: [ "pup", "cup" ]
+  }
+
+  var ut = {
+    name: "ut",
+    words: [ "cut", "hut" ]
+  }
+
+  var us = {
+    name: "us",
+    words: [ "bus" ]
+  }
+
+  var three_a = { 
+    name: "3 Letter Words (a)",
+    sets: [ am, an, ap, at, ag, ab, ax ]
+  }
+
+  var three_i = { 
+    name: "3 Letter Words (i)",
+    sets: [ it, inSet, ig, ip, id, ib, im, is, ix ]
+  }
+  
+  var three_o = { 
+    name: "3 Letter Words (o)",
+    sets: [ ot, op, ob, od, og, or ]
+  }
+
+  var three_e = { 
+    name: "3 Letter Words (e)",
+    sets: [ en, et, ed, eg ]
+  }
+
+  var three_u = { 
+    name: "3 Letter Words (u)",
+    sets: [ ub, ud, ug, um, un, up, ut, us ]
+  }
+  
+  var stage_one = { 
+    name: "Stage 1",
+    lessons: [ three_a, three_i, three_o, three_e, three_u ]
+  }
+  
+  var words = {};
+  words.stages = [ stage_one ];  
+  words.letters = function() {
+    return $.map(this.currentSet.words[this.currentWord].split(""), function(letter, index) {
+      return $("<span/>").attr("id", "letter-" + index).addClass("letter").text(letter).get(0);
+    });
+  }
+  words.nextSet = function() {
+    if (typeof this.currentSetIndex === "undefined") {
+      this.currentStageIndex = 0;
+      this.currentLessonIndex = 0;
+      this.currentSetIndex = 0;
+    } else {
+      if (this.stages[this.currentStageIndex].lessons[this.currentLessonIndex].sets.length === (this.currentSetIndex + 1)) {
+        this.currentLessonIndex += 1;
+        this.currentSetIndex = 0;        
+      } else {
+        this.currentSetIndex += 1;        
+      }
+    }
+    this.currentWord = 0;
+    this.currentLetter = 0;
+    this.currentSet = this.stages[this.currentStageIndex].lessons[this.currentLessonIndex].sets[this.currentSetIndex];    
+  }
+  words.letter = function() {
+    return this.currentSet.words[this.currentWord].charAt(this.currentLetter);
+  }
+  words.lastLetter = function() {
+    return this.currentSet.words[this.currentWord].length === (this.currentLetter + 1);
+  }
+  words.lastWord = function() {
+    return this.currentSet.words.length === (this.currentWord + 1);    
+  }
+  words.next = function() {
+    if (this.lastWord()) {
+      return false;
+    }
+    this.currentWord += 1;
+    this.currentLetter = 0;
+    return true;
+  }
+
+  var startButton = $("button"), boardElement = $("#board"), changingWord = false;
+
+  startButton.click(function() {
+    $(this).remove();
+    boardElement.html(words.letters());
+  });
+  
+  $(document).keypress(function(e) {
+    if (changingWord) {
+      return true;
+    }
+    var typed = String.fromCharCode(e.which);
+    if (typed.toLowerCase() === words.letter()) {
+      boardElement.find("#letter-" + words.currentLetter).addClass("matched");
+      if (words.lastLetter()) {
+        changingWord = true;
+        setTimeout(function() {
+          if (words.next()) {
+            boardElement.html(words.letters());
+          } else {
+            var endSet = $("<p>Great job, Annabelle! </p>");
+            var nextSetButton = $("<button/>").text("Next");
+            nextSetButton.click(function() {
+              words.nextSet();
+              $("#theme").text(words.currentSet.name);              
+              boardElement.html(words.letters());
+            });
+            endSet.append(nextSetButton);
+            boardElement.html(endSet);
+            nextSetButton.focus();         
+          }
+          changingWord = false;
+        }, 1000);
+      } else {
+        words.currentLetter += 1;        
+      }
+    }
+    return true;
+  });
+
+  words.nextSet();
+  
+  $("#theme").text(words.currentSet.name);
+    
+  startButton.focus();
+  
+  
+  </script>
+</html>
