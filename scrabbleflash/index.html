@@ -22,13 +22,20 @@
         Enjoy playing! -  Annabelle and Corgan, Scrabble Flash Designers        
       </p>
     </div>    
-    <div id="board">
-      <div class="tile">R</div>
-      <div class="tile">S</div>
-      <div class="tile">T</div>
-      <div class="tile">E</div>
-      <div class="tile">A</div>                    
-    </div>    
+    <div id="letters">
+      <div class="slot tile" id="letter-1" draggable="true">R</div>
+      <div class="slot tile" id="letter-2" draggable="true">S</div>
+      <div class="slot tile" id="letter-3" draggable="true">T</div>
+      <div class="slot tile" id="letter-4" draggable="true">E</div>
+      <div class="slot tile" id="letter-5" draggable="true">A</div>                    
+    </div>
+    <div id="word">
+      <div class="slot" id="word-letter-1"></div>
+      <div class="slot" id="word-letter-2"></div>
+      <div class="slot" id="word-letter-3"></div>
+      <div class="slot" id="word-letter-4"></div>
+      <div class="slot" id="word-letter-5"></div>            
+    </div>       
     <div id="control">
       <div id="score">
         <span>Score:</span>
@@ -56,5 +63,40 @@
     return false;
   });
   
+  var i, slots = $(".slot"), slot;
+  slots.on("dragstart", function(e) {
+    e.originalEvent.dataTransfer.setData('Text', this.id);      
+  });  
+  slots.on("dragover", function(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    $(this).addClass("over");
+    return false;
+  });
+  slots.on("dragleave", function(e) {
+    $(this).removeClass("over");
+  });
+  slots.on("drop", function(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+    var id = e.originalEvent.dataTransfer.getData("Text"), from = $("#" + id), to = $(this), tmp;
+    if (to.hasClass("tile")) {
+      // swap
+      tmp = from.html();
+      from.html(to.html());
+      to.html(tmp);
+    } else {     
+      to.addClass("tile");
+      to.attr("draggable", true);
+      to.html(from.html());
+      from.html("");
+      from.removeClass("tile");      
+      from.removeAttr("draggable");      
+    }
+    to.removeClass("over");    
+    return false;
+  });
   </script>
 </html>

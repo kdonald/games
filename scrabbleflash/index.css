@@ -6,16 +6,37 @@ body {
   display: none;
 }
 
-#board {
+.tile {
+  border: 2px solid #333;  
   float: left;
+  font-size: 1.5em;  
+  height: 64px;
+  width: 64px;
+  line-height: 64px;
+  text-align: center;  
+  margin: 4px;  
 }
 
-#board .tile {
-  border: 1px solid #333;  
+#word {
+  clear: both;
+}
+
+.slot {
+  border: 2px dotted #333;  
   float: left;
   height: 64px;
   width: 64px;
   line-height: 64px;
   text-align: center;  
   margin: 4px;  
+}
+
+.slot.over {
+  border: 2px dotted red;  
+}
+
+#control {
+  clear: both;
+  padding-top: 16px;
+  margin: 16px;
 }
