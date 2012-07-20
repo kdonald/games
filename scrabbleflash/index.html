@@ -23,18 +23,18 @@
       </p>
     </div>    
     <div id="letters">
-      <div class="slot tile" id="letter-1" draggable="true">R</div>
-      <div class="slot tile" id="letter-2" draggable="true">S</div>
-      <div class="slot tile" id="letter-3" draggable="true">T</div>
-      <div class="slot tile" id="letter-4" draggable="true">E</div>
-      <div class="slot tile" id="letter-5" draggable="true">A</div>                    
+      <div class="slot tile" id="letter-0" draggable="true">R</div>
+      <div class="slot tile" id="letter-1" draggable="true">S</div>
+      <div class="slot tile" id="letter-2" draggable="true">T</div>
+      <div class="slot tile" id="letter-3" draggable="true">E</div>
+      <div class="slot tile" id="letter-4" draggable="true">A</div>                    
     </div>
     <div id="word">
+      <div class="slot" id="word-letter-0"></div>
       <div class="slot" id="word-letter-1"></div>
       <div class="slot" id="word-letter-2"></div>
       <div class="slot" id="word-letter-3"></div>
-      <div class="slot" id="word-letter-4"></div>
-      <div class="slot" id="word-letter-5"></div>            
+      <div class="slot" id="word-letter-4"></div>            
     </div>       
     <div id="control">
       <div id="score">
@@ -63,6 +63,9 @@
     return false;
   });
   
+  var game = {};
+  game.word = new Array(5);
+  
   var i, slots = $(".slot"), slot;
   slots.on("dragstart", function(e) {
     e.originalEvent.dataTransfer.setData('Text', this.id);      
@@ -81,22 +84,47 @@
     if (e.stopPropagation) {
       e.stopPropagation();
     }
-    var id = e.originalEvent.dataTransfer.getData("Text"), from = $("#" + id), to = $(this), tmp;
+    var from = $("#" + e.originalEvent.dataTransfer.getData("Text")), to = $(this), tmp;
     if (to.hasClass("tile")) {
       // swap
-      tmp = from.html();
-      from.html(to.html());
-      to.html(tmp);
-    } else {     
+      if (from.attr("id").slice(0, 12) === "word-letter-") {
+        var index = parseInt(from.attr("id").slice(12));
+        game.word[index] = to.text();         
+      }
+      if (to.attr("id").slice(0, 12) === "word-letter-") {
+        var index = parseInt(to.attr("id").slice(12));
+        game.word[index] = from.text();         
+      }      
+      tmp = from.text();
+      from.text(to.text());
+      to.text(tmp);
+    } else {
+      if (from.attr("id").slice(0, 12) === "word-letter-") {
+        var index = parseInt(from.attr("id").slice(12));
+        delete game.word[index];
+      }
+      if (to.attr("id").slice(0, 12) === "word-letter-") {
+        var index = parseInt(to.attr("id").slice(12));
+        game.word[index] = from.text();         
+      }      
       to.addClass("tile");
       to.attr("draggable", true);
-      to.html(from.html());
-      from.html("");
+      to.text(from.text());
+      from.text("");
       from.removeClass("tile");      
       from.removeAttr("draggable");      
     }
     to.removeClass("over");    
     return false;
+  });
+  
+  $(document).keypress(function(e) {
+    if (e.which === 13) {
+      console.log("Enter pressed");
+      console.log(game.word);
+      return false;
+    }
+    return true;
   });
   </script>
 </html>

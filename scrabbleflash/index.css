@@ -6,18 +6,15 @@ body {
   display: none;
 }
 
-.tile {
-  border: 2px solid #333;  
-  float: left;
-  font-size: 1.5em;  
-  height: 64px;
-  width: 64px;
-  line-height: 64px;
-  text-align: center;  
-  margin: 4px;  
+#letters {
+  width: 380px;
+  padding-bottom: 8px;
+  overflow: auto;
+  border-bottom: 1px solid #ccc;
 }
 
 #word {
+  margin-top: 8px;
   clear: both;
 }
 
@@ -26,13 +23,17 @@ body {
   float: left;
   height: 64px;
   width: 64px;
-  line-height: 64px;
-  text-align: center;  
   margin: 4px;  
 }
 
 .slot.over {
   border: 2px dotted red;  
+}
+
+.tile {
+  font-size: 1.5em;  
+  line-height: 64px;  
+  text-align: center;  
 }
 
 #control {
