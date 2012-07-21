@@ -12,11 +12,10 @@
     <p>If this is your first time playing, <a href="">read the rules</a>.
     <div id="rules" class="hidden">
       <p>
-        Scrabble Flash is a game where the players make words using 5 electronic letter tiles.
-        Alternating between teams, each player takes a turn picking what word they can make.
-        The player then arranges the tiles needed to make that word.
-        The team gets 3 points for making a word with 3 letters, 4 points by making a word with 4 letters, or 5 points by making a word with 5 letters.
-        The first player to reach a score of 25 points or more is the winner.
+        Scrabble Flash is a fun game where two players compete by making words.
+        Each player takes a turn arranging the letters to make a word on the bottom row, then presses "enter" to submit.
+        Players get three points for a three-letter word, four points for a four-letter word, and five points for a five-letter word.
+        The first player to reach 25 points wins!
       </p>
       <p>
         Enjoy playing! -  Annabelle and Corgan, Scrabble Flash Designers        
@@ -116,35 +115,69 @@
       }
       return players;
     }
-        
+    
+    var dictionaries = {};
+    dictionaries.three = {};
+    dictionaries.four = {};
+    dictionaries.five = {}; 
+    
+    function loadDictionary(file, dictionary) {
+      return $.Deferred(function(deferred) {
+        $.get(file, function(txt) {
+          var words = txt.split(" ");
+          for (var i = 0; i < words.length; i++) {
+            dictionary[words[i]] = true; 
+          }
+          deferred.resolve();      
+        });          
+      });
+    }
+    
+    function initDictionary() {
+      var init = $.when(
+        loadDictionary("words/3.txt", dictionaries.three),
+        loadDictionary("words/4.txt", dictionaries.four),
+        loadDictionary("words/5.txt", dictionaries.five)        
+      ).done(function() {
+        dictionaries.ready = true;
+      })
+    }
+    
+    initDictionary();
+    
     return function(args) {
       var i, game = {};
       game.players = createPlayers(args.players);
       game.board = new Array(5);
+      game.guessed = {};
       game.submit = function() {
-        if (this.winner) {
+        if (!dictionaries.ready || this.winner) {
           return false;
         }
-        var word = new Array(), i, letter; 
+        var word = "", i, letter;
         for (i = 0; i < this.board.length; i++) {
           letter = this.board[i];
           if (letter) {
-            word.push(letter);
+            word += letter;
           } else {
             break;
           }
         }
-        if (word.length >= 3) {
+        if (word.length >= 3 && word.length <= 5) {
+          if (this.guessed[word]) {
+            throw new Error("Word already guessed");
+          }
           this.judge(word, function(correct) {
             if (correct) {
-              game.currentPlayer.score += word.length;
+              this.currentPlayer.score += word.length;
+              this.guessed[word] = true;
               this.trigger("score");
               if (game.currentPlayer.score >= 25) {
                 this.winner = true;
                 this.trigger("winner");
               } else {
                 this.nextPlayer();
-              }        
+              }       
             } else {
               this.nextPlayer();
             }
@@ -154,7 +187,15 @@
         }
       }
       game.judge = function(word, callback) {
-        callback.call(this, true);
+        if (word.length === 3) {
+          callback.call(this, dictionaries.three[word]);
+        } else if (word.length === 4) {
+          callback.call(this, dictionaries.four[word]);          
+        } else if (word.length === 5) {
+          callback.call(this, dictionaries.five[word]);          
+        } else {
+          callback.call(this, false);          
+        }
       }
       game.nextPlayer = function() {
         var next = this.currentPlayer.number < (this.players.length - 1) ? this.currentPlayer.number + 1 : 0;
@@ -170,7 +211,7 @@
   (function() {
     // main program
     var game = scrabbleflash.game = scrabbleflash({
-      players: [ "Annabelle", "Corgan" ]
+      players: [ "Player 1", "Player 2" ]
     });
     
     var i, slots = $(".slot"), slot, playerScoreFields = new Array(game.players.length), playersTurnField = $("#players-turn strong");
