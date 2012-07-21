@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Family Game Night Scrabble Flash</title>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <link rel="stylesheet" href="index.css" />
+    <meta name="description" content="An fun twist on Scrabble inspired by the gameshow &quot;Family Game Night&quot;."> 
+  </head>
+  <body>
+    <h1>Family Game Night Scrabble Flash</h1>
+    <h3>an ACD production (v1.0)</h3>
+    <p>If this is your first time playing, <a href="">read the rules</a>.
+    <div id="rules" class="hidden">
+      <p>
+        Scrabble Flash is a fun game where two players compete by making words.
+        Each player takes a turn arranging the letters to make a word on the bottom row, then presses "enter" to submit.
+        Players get three points for a three-letter word, four points for a four-letter word, and five points for a five-letter word.
+        The first player to reach 25 points wins!
+      </p>
+      <p>
+        Enjoy playing! -  Annabelle and Corgan, Scrabble Flash Designers        
+      </p>
+    </div>    
+    <div id="letters">
+      <div class="slot tile" id="letter-0" draggable="true"></div>
+      <div class="slot tile" id="letter-1" draggable="true"></div>
+      <div class="slot tile" id="letter-2" draggable="true"></div>
+      <div class="slot tile" id="letter-3" draggable="true"></div>
+      <div class="slot tile" id="letter-4" draggable="true"></div>                    
+    </div>
+    <div id="word">
+      <div class="slot" id="word-letter-0"></div>
+      <div class="slot" id="word-letter-1"></div>
+      <div class="slot" id="word-letter-2"></div>
+      <div class="slot" id="word-letter-3"></div>
+      <div class="slot" id="word-letter-4"></div>            
+    </div>       
+    <div id="control">
+      <div id="score">
+        <span>Score:</span>
+        <label id="player-0">
+          <span class="name"></span>
+          <strong>0</strong>
+        </label>
+        <label id="player-1">
+          <span class="name"></span>
+          <strong>0</strong>
+        </label>
+      </div>
+      <div id="players-turn">
+        <label>
+          Turn:
+          <strong></strong>
+        </label>  
+      </div>
+    </div>
+  </body>
+  <script>
+  
+  $("p > a").click(function() {
+    $("#rules").toggleClass("hidden");
+    return false;
+  });
+    
+  var scrabbleflash = (function() {
+
+    var map = (function() {
+      var mapPrototype = {
+         get: function(key) {
+          if (!this.data.hasOwnProperty(key)) {
+            this.data[key] = this.newValue(key);
+          }
+          return this.data[key];
+        }
+      }
+      return {
+        create: function(args) {
+          return Object.create(mapPrototype, {
+            data: { value: {} },
+            newValue: { value: args.newValue }
+          });
+        },
+        ofArrays: function() {
+          return this.create({
+            newValue: function() { return []; }      
+          });
+        }
+      }      
+    })();
+        
+    function makeObservable(obj) {
+      obj.listeners = map.ofArrays();
+      obj.on = function(event, listener) {
+        this.listeners.get(event).push(listener);
+        return this;       
+      }
+      obj.trigger = function(event, args) {
+        var listeners = this.listeners.get(event);
+        listeners.forEach(function(listener) {
+          listener(args);
+        });
+        return this;        
+      }
+      return obj;
+    }
+    
+    function createPlayers(playerNames) {
+      var i, players = new Array(playerNames.length), player;
+      for (i = 0; i < playerNames.length; i += 1) {
+        player = {};
+        player.number = i;
+        player.name = playerNames[i];
+        player.score = 0;
+        players[i] = player;
+      }
+      return players;
+    }
+    
+    var dictionaries = {};
+    dictionaries.three = {};
+    dictionaries.four = {};
+    dictionaries.five = {}; 
+    
+    function loadDictionary(file, dictionary) {
+      return $.Deferred(function(deferred) {
+        $.get(file, function(txt) {
+          var words = txt.split(" ");
+          for (var i = 0; i < words.length; i++) {
+            dictionary[words[i]] = true; 
+          }
+          deferred.resolve();      
+        });          
+      });
+    }
+    
+    function initDictionary() {
+      var init = $.when(
+        loadDictionary("words/3.txt", dictionaries.three),
+        loadDictionary("words/4.txt", dictionaries.four),
+        loadDictionary("words/5.txt", dictionaries.five)        
+      ).done(function() {
+        dictionaries.ready = true;
+      })
+    }
+    
+    initDictionary();
+
+    var letterSets = [
+      ['R', 'S', 'T', 'A', 'E'],
+      ['N', 'T', 'R', 'D', 'E'],
+      ['F', 'D', 'S', 'E', 'R'],
+      ['C', 'B', 'A', 'S', 'T'],
+      ['H', 'T', 'O', 'P', 'A'],
+      ['S', 'P', 'H', 'T', 'I'],
+      ['K', 'T', 'E', 'I', 'B'],
+      ['W', 'H', 'T', 'S', 'A'],
+      ['A', 'G', 'S', 'O', 'D'],
+      ['L', 'N', 'S', 'E', 'D']
+    ]
+    function letters() {
+      return letterSets[Math.floor(Math.random() * letterSets.length)];
+    }
+    
+    return function(args) {
+      var i, game = {};
+      game.letters = letters();
+      game.players = createPlayers(args.players);
+      game.board = new Array(5);
+      game.guessed = {};
+      game.submit = function() {
+        if (!dictionaries.ready || this.winner) {
+          return false;
+        }
+        var word = "", i, letter;
+        for (i = 0; i < this.board.length; i++) {
+          letter = this.board[i];
+          if (letter) {
+            word += letter;
+          } else {
+            break;
+          }
+        }
+        if (word.length >= 3 && word.length <= 5) {
+          if (this.guessed[word]) {
+            throw new Error("Word already guessed");
+          }
+          this.judge(word, function(correct) {
+            if (correct) {
+              this.currentPlayer.score += word.length;
+              this.guessed[word] = true;
+              this.trigger("score");
+              if (game.currentPlayer.score >= 25) {
+                this.winner = true;
+                this.trigger("winner");
+              } else {
+                this.nextPlayer();
+              }       
+            } else {
+              this.nextPlayer();
+            }
+          });
+        } else {
+          throw new Error("Must be 3, 4, or 5 letters to submit");
+        }
+      }
+      game.judge = function(word, callback) {
+        if (word.length === 3) {
+          callback.call(this, dictionaries.three[word]);
+        } else if (word.length === 4) {
+          callback.call(this, dictionaries.four[word]);          
+        } else if (word.length === 5) {
+          callback.call(this, dictionaries.five[word]);          
+        } else {
+          callback.call(this, false);          
+        }
+      }
+      game.nextPlayer = function() {
+        var next = this.currentPlayer.number < (this.players.length - 1) ? this.currentPlayer.number + 1 : 0;
+        this.currentPlayer = this.players[next];
+        this.trigger("player-changed");        
+      }
+      game.currentPlayer = game.players[0]; 
+      makeObservable(game);
+      return game;
+    }
+  })();
+  
+  (function() {
+    // main program
+    var game = scrabbleflash.game = scrabbleflash({
+      players: [ "Player 1", "Player 2" ]
+    });
+    
+    var i, slots = $(".slot"), slot, playerScoreFields = new Array(game.players.length), playersTurnField = $("#players-turn strong"), tiles = $("#letters .tile");
+
+    for (i = 0; i < game.letters.length; i++) {
+      $(tiles[i]).text(game.letters[i]);
+    }
+    
+    for (i = 0; i < game.players.length; i++) {
+      var player = game.players[i], label = $("#player-" + player.number);
+      label.find("span").html(player.name + ":");
+      playerScoreFields[i] = label.find("strong");
+    }
+    
+    slots.on("dragstart", function(e) {
+      e.originalEvent.dataTransfer.setData('Text', this.id);      
+    });  
+    slots.on("dragover", function(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+      $(this).addClass("over");
+      return false;
+    });
+    slots.on("dragleave", function(e) {
+      $(this).removeClass("over");
+    });
+    slots.on("drop", function(e) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+      var from = $("#" + e.originalEvent.dataTransfer.getData("Text")), to = $(this), tmp;
+      if (to.hasClass("tile")) {
+        // swap
+        if (from.attr("id").slice(0, 12) === "word-letter-") {
+          var index = parseInt(from.attr("id").slice(12));
+          game.board[index] = to.text();         
+        }
+        if (to.attr("id").slice(0, 12) === "word-letter-") {
+          var index = parseInt(to.attr("id").slice(12));
+          game.board[index] = from.text();         
+        }      
+        tmp = from.text();
+        from.text(to.text());
+        to.text(tmp);
+      } else {
+        if (from.attr("id").slice(0, 12) === "word-letter-") {
+          var index = parseInt(from.attr("id").slice(12));
+          delete game.board[index];
+        }
+        if (to.attr("id").slice(0, 12) === "word-letter-") {
+          var index = parseInt(to.attr("id").slice(12));
+          game.board[index] = from.text();         
+        }      
+        to.addClass("tile");
+        to.attr("draggable", true);
+        to.text(from.text());
+        from.text("");
+        from.removeClass("tile");      
+        from.removeAttr("draggable");      
+      }
+      to.removeClass("over");    
+      return false;
+    });
+
+    $(document).keypress(function(e) {
+      if (e.which === 13) {
+        game.submit();
+        return false;
+      }
+      return true;
+    });
+    
+    game.on("score", function() {
+      playerScoreFields[game.currentPlayer.number].html(game.currentPlayer.score);      
+    });
+
+    playersTurnField.html(game.currentPlayer.name);    
+    game.on("player-changed", function() {
+      playersTurnField.html(game.currentPlayer.name);            
+    });
+    
+    game.on("winner", function() {
+      console.log("winner");
+      playersTurnField.html(game.currentPlayer.name + " wins!");            
+    });
+    
+  })();
+  
+
+  </script>
+</html>

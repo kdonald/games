@@ -1,0 +1,46 @@
+body {
+  font-family: Helvetica;
+}
+
+.hidden {
+  display: none;
+}
+
+#letters {
+  width: 380px;
+  padding-bottom: 8px;
+  overflow: auto;
+  border-bottom: 1px solid #ccc;
+}
+
+#word {
+  margin-top: 8px;
+  clear: both;
+}
+
+.slot {
+  border: 2px dotted #333;  
+  float: left;
+  height: 64px;
+  width: 64px;
+  margin: 4px;  
+}
+
+.slot.over {
+  border: 2px dotted red;  
+}
+
+.tile {
+  font-size: 1.5em;  
+  line-height: 64px;  
+  text-align: center;  
+}
+
+#control {
+  clear: both;
+  padding-top: 16px;
+}
+
+#players-turn {
+  margin-top: 8px;
+}
