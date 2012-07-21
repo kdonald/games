@@ -22,11 +22,11 @@
       </p>
     </div>    
     <div id="letters">
-      <div class="slot tile" id="letter-0" draggable="true">R</div>
-      <div class="slot tile" id="letter-1" draggable="true">S</div>
-      <div class="slot tile" id="letter-2" draggable="true">T</div>
-      <div class="slot tile" id="letter-3" draggable="true">E</div>
-      <div class="slot tile" id="letter-4" draggable="true">A</div>                    
+      <div class="slot tile" id="letter-0" draggable="true"></div>
+      <div class="slot tile" id="letter-1" draggable="true"></div>
+      <div class="slot tile" id="letter-2" draggable="true"></div>
+      <div class="slot tile" id="letter-3" draggable="true"></div>
+      <div class="slot tile" id="letter-4" draggable="true"></div>                    
     </div>
     <div id="word">
       <div class="slot" id="word-letter-0"></div>
@@ -144,9 +144,26 @@
     }
     
     initDictionary();
+
+    var letterSets = [
+      ['R', 'S', 'T', 'A', 'E'],
+      ['N', 'T', 'R', 'D', 'E'],
+      ['F', 'D', 'S', 'E', 'R'],
+      ['C', 'B', 'A', 'S', 'T'],
+      ['H', 'T', 'O', 'P', 'A'],
+      ['S', 'P', 'H', 'T', 'I'],
+      ['K', 'T', 'E', 'I', 'B'],
+      ['W', 'H', 'T', 'S', 'A'],
+      ['A', 'G', 'S', 'O', 'D'],
+      ['L', 'N', 'S', 'E', 'D']
+    ]
+    function letters() {
+      return letterSets[Math.floor(Math.random() * letterSets.length)];
+    }
     
     return function(args) {
       var i, game = {};
+      game.letters = letters();
       game.players = createPlayers(args.players);
       game.board = new Array(5);
       game.guessed = {};
@@ -214,8 +231,12 @@
       players: [ "Player 1", "Player 2" ]
     });
     
-    var i, slots = $(".slot"), slot, playerScoreFields = new Array(game.players.length), playersTurnField = $("#players-turn strong");
+    var i, slots = $(".slot"), slot, playerScoreFields = new Array(game.players.length), playersTurnField = $("#players-turn strong"), tiles = $("#letters .tile");
 
+    for (i = 0; i < game.letters.length; i++) {
+      $(tiles[i]).text(game.letters[i]);
+    }
+    
     for (i = 0; i < game.players.length; i++) {
       var player = game.players[i], label = $("#player-" + player.number);
       label.find("span").html(player.name + ":");
