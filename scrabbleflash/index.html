@@ -223,16 +223,66 @@
         return letters;        
       }
       
+      var easySets = [
+        ['E', 'T', 'A', 'P', 'T'],
+        ['W', 'O', 'E', 'S', 'N'],
+        ['E', 'P', 'Y', 'A', 'S'],
+        ['R', 'C', 'U', 'S', 'E'],
+        ['O', 'L', 'E', 'D', 'S'],
+        ['P', 'E', 'S', 'W', 'A'],
+        ['T', 'N', 'W', 'O', 'S'],
+        ['E', 'E', 'R', 'S', 'D'],
+        ['G', 'E', 'T', 'A', 'S'],
+        ['E', 'A', 'N', 'T', 'G'],
+        ['S', 'R', 'W', 'A', 'E'],
+        ['G', 'T', 'L', 'E', 'A'],
+        ['S', 'I', 'D', 'O', 'L'],
+        ['S', 'E', 'O', 'R', 'M'],
+        ['W', 'N', 'E', 'A', 'S'],
+        ['T', 'S', 'E', 'A', 'E'],
+        ['F', 'E', 'A', 'L', 'T'],
+        ['S', 'A', 'O', 'B', 'R'],
+        ['T', 'A', 'L', 'S', 'O'],        
+        ['O', 'S', 'E', 'R', 'U'],        
+        ['T', 'R', 'E', 'A', 'P'],        
+        ['E', 'T', 'D', 'S', 'A'],        
+        ['P', 'H', 'S', 'A', 'E'],        
+        ['T', 'O', 'R', 'S', 'I'],        
+        ['P', 'R', 'S', 'W', 'A'],        
+        ['A', 'S', 'T', 'T', 'W'],        
+        ['R', 'T', 'B', 'A', 'E'],        
+        ['M', 'I', 'A', 'S', 'N'],        
+        ['A', 'E', 'R', 'P', 'G'],        
+        ['S', 'R', 'O', 'A', 'B'],        
+        ['A', 'L', 'E', 'H', 'S'],        
+        ['S', 'T', 'A', 'E', 'D'],        
+        ['T', 'R', 'N', 'E', 'A'],        
+        ['R', 'A', 'E', 'T', 'O'],        
+        ['R', 'S', 'T', 'L', 'E']        
+      ];
+
       return {
-        easy: function() {
-          console.log("Finding a set of letters that contain enough points to win. Please Wait...")
+        populate: function() {
+          this.easy = new Array(), this.medium = new Array(), this.hard = new Array();
           var score = 0, letters;
-          while (score < 70) {
+          while (this.easy.length < 100 || this.medium.length < 100 || this.hard.length < 100) {
             letters = makeLetters();
             score = scoreSet(letters);
+            if (score >= 49 && score < 60) {
+              console.log("Found hard set " + letters.join('') + " (" + score + ")");
+              this.hard.push(letters);
+            } else if (score >= 60 && score < 80) {
+              console.log("Found medium set " + letters.join('')+ " (" + score + ")");              
+              this.medium.push(letters);
+            } else if (score >= 80) {
+              console.log("Found easy set " + letters.join('') + " (" + score + ")");              
+              this.easy.push(letters);
+            }
           }
-          console.log("Done! There are " + score + " points available. Good luck!");
-          return letters;
+          console.log("Done!");
+        },
+        easy: function() {
+          return easySets[Math.floor(Math.random() * easySets.length)];
         }
       }
        
