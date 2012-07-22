@@ -120,6 +120,7 @@
     dictionaries.three = {};
     dictionaries.four = {};
     dictionaries.five = {}; 
+    makeObservable(dictionaries);
     
     function loadDictionary(file, dictionary) {
       return $.Deferred(function(deferred) {
@@ -132,43 +133,168 @@
         });          
       });
     }
-    
+        
     function initDictionary() {
-      var init = $.when(
+      dictionaries.init = $.when(
         loadDictionary("words/3.txt", dictionaries.three),
         loadDictionary("words/4.txt", dictionaries.four),
         loadDictionary("words/5.txt", dictionaries.five)        
-      ).done(function() {
-        dictionaries.ready = true;
-      })
+      );
     }
     
     initDictionary();
+    
+    var letters = (function() {
+      
+      var combos = (function() {
+        function doCombos(prefix, set, count, combos) {
+          if (count === 0) {
+            combos.push(prefix);
+            return;
+          } else {
+            for (var i = 0; i < set.length; i++) {
+              doCombos(prefix + set[i], set.slice(i + 1), count - 1, combos);
+            }
+          }
+        }
+        
+        return function(set, count) {
+          var combos = new Array();
+          if (set.length == count) {
+            combos.push(set);
+          } else {
+            doCombos("", set, count, combos);
+          }
+          return combos;
+        }
+      })();
 
-    var letterSets = [
-      ['R', 'S', 'T', 'A', 'E'],
-      ['N', 'T', 'R', 'D', 'E'],
-      ['F', 'D', 'S', 'E', 'R'],
-      ['C', 'B', 'A', 'S', 'T'],
-      ['H', 'T', 'O', 'P', 'A'],
-      ['S', 'P', 'H', 'T', 'I'],
-      ['K', 'T', 'E', 'I', 'B'],
-      ['W', 'H', 'T', 'S', 'A'],
-      ['A', 'G', 'S', 'O', 'D'],
-      ['L', 'N', 'S', 'E', 'D']
-    ]
-    function letters() {
-      return letterSets[Math.floor(Math.random() * letterSets.length)];
-    }
+      function scoreSet(set) {
+        var score = 0;
+        score += scoreLetters(set, dictionaries.five, 5);
+        score += scoreLetters(set, dictionaries.four, 4);
+        score += scoreLetters(set, dictionaries.three, 3);
+        return score;
+      }
+      
+      function scoreLetters(set, dictionary, count) {
+        var score = 0;
+        combos(set, count).forEach(function(set) {
+          setCounts = countLetters(set);
+          for (word in dictionary) {
+            wordCounts = countLetters(word);
+            if (setCounts.equals(wordCounts)) {
+              score += count;
+            }
+          }            
+        });
+        return score;
+      }
+      
+      function countLetters(word) {
+        var counts = new Array(26), letter, val;
+        for (var i = 0; i < word.length; i++) {
+          letter = word[i].charCodeAt() - 65;
+          val = counts[letter];
+          if (!val) {
+            counts[letter] = 1; 
+          } else {
+            counts[letter] += 1;
+          }
+        }
+        counts.equals = function(counts) {
+          for (var i = 0; i < this.length; i++) {
+            if (!(this[i] === counts[i])) {
+              return false;
+            }
+          }
+          return true;
+        }
+        return counts;
+      }
+      
+      var alphabet = [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
+      function makeLetters() {
+        var letters = new Array(5);
+        for (var i = 0; i < letters.length; i++) {
+          letters[i] = alphabet[Math.floor(Math.random() * 26)];
+        }
+        return letters;        
+      }
+      
+      var easySets = [
+        ['E', 'T', 'A', 'P', 'T'],
+        ['W', 'O', 'E', 'S', 'N'],
+        ['E', 'P', 'Y', 'A', 'S'],
+        ['R', 'C', 'U', 'S', 'E'],
+        ['O', 'L', 'E', 'D', 'S'],
+        ['P', 'E', 'S', 'W', 'A'],
+        ['T', 'N', 'W', 'O', 'S'],
+        ['E', 'E', 'R', 'S', 'D'],
+        ['G', 'E', 'T', 'A', 'S'],
+        ['E', 'A', 'N', 'T', 'G'],
+        ['S', 'R', 'W', 'A', 'E'],
+        ['G', 'T', 'L', 'E', 'A'],
+        ['S', 'I', 'D', 'O', 'L'],
+        ['S', 'E', 'O', 'R', 'M'],
+        ['W', 'N', 'E', 'A', 'S'],
+        ['T', 'S', 'E', 'A', 'E'],
+        ['F', 'E', 'A', 'L', 'T'],
+        ['S', 'A', 'O', 'B', 'R'],
+        ['T', 'A', 'L', 'S', 'O'],        
+        ['O', 'S', 'E', 'R', 'U'],        
+        ['T', 'R', 'E', 'A', 'P'],        
+        ['E', 'T', 'D', 'S', 'A'],        
+        ['P', 'H', 'S', 'A', 'E'],        
+        ['T', 'O', 'R', 'S', 'I'],        
+        ['P', 'R', 'S', 'W', 'A'],        
+        ['A', 'S', 'T', 'T', 'W'],        
+        ['R', 'T', 'B', 'A', 'E'],        
+        ['M', 'I', 'A', 'S', 'N'],        
+        ['A', 'E', 'R', 'P', 'G'],        
+        ['S', 'R', 'O', 'A', 'B'],        
+        ['A', 'L', 'E', 'H', 'S'],        
+        ['S', 'T', 'A', 'E', 'D'],        
+        ['T', 'R', 'N', 'E', 'A'],        
+        ['R', 'A', 'E', 'T', 'O'],        
+        ['R', 'S', 'T', 'L', 'E']        
+      ];
+
+      return {
+        populate: function() {
+          this.easy = new Array(), this.medium = new Array(), this.hard = new Array();
+          var score = 0, letters;
+          while (this.easy.length < 100 || this.medium.length < 100 || this.hard.length < 100) {
+            letters = makeLetters();
+            score = scoreSet(letters);
+            if (score >= 49 && score < 60) {
+              console.log("Found hard set " + letters.join('') + " (" + score + ")");
+              this.hard.push(letters);
+            } else if (score >= 60 && score < 80) {
+              console.log("Found medium set " + letters.join('')+ " (" + score + ")");              
+              this.medium.push(letters);
+            } else if (score >= 80) {
+              console.log("Found easy set " + letters.join('') + " (" + score + ")");              
+              this.easy.push(letters);
+            }
+          }
+          console.log("Done!");
+        },
+        easy: function() {
+          return easySets[Math.floor(Math.random() * easySets.length)];
+        }
+      }
+       
+    })();
     
     return function(args) {
-      var i, game = {};
-      game.letters = letters();
+      var i, game = {}, init = $.Deferred();
       game.players = createPlayers(args.players);
       game.board = new Array(5);
       game.guessed = {};
       game.submit = function() {
-        if (!dictionaries.ready || this.winner) {
+        if (this.winner) {
           return false;
         }
         var word = "", i, letter;
@@ -219,101 +345,121 @@
         this.currentPlayer = this.players[next];
         this.trigger("player-changed");        
       }
-      game.currentPlayer = game.players[0]; 
+      game.currentPlayer = game.players[0];
       makeObservable(game);
+      dictionaries.init.done(function() {
+        game.letters = letters.easy();
+        init.resolve();
+      });
+      game.ready = function(callback) {
+        init.done(callback);
+      }      
       return game;
     }
   })();
   
   (function() {
+    
     // main program
     var game = scrabbleflash.game = scrabbleflash({
       players: [ "Player 1", "Player 2" ]
     });
     
-    var i, slots = $(".slot"), slot, playerScoreFields = new Array(game.players.length), playersTurnField = $("#players-turn strong"), tiles = $("#letters .tile");
-
-    for (i = 0; i < game.letters.length; i++) {
-      $(tiles[i]).text(game.letters[i]);
+    function initLetterTiles() {
+      var tiles = $("#letters .tile");
+      for (var i = 0; i < game.letters.length; i++) {
+        $(tiles[i]).text(game.letters[i]);
+      }      
     }
     
-    for (i = 0; i < game.players.length; i++) {
-      var player = game.players[i], label = $("#player-" + player.number);
-      label.find("span").html(player.name + ":");
-      playerScoreFields[i] = label.find("strong");
+    function initPlayerIndicators() {
+      var playerScoreFields = new Array(game.players.length), playersTurnField = $("#players-turn strong");
+      for (var i = 0; i < game.players.length; i++) {
+        var player = game.players[i], label = $("#player-" + player.number);
+        label.find("span").html(player.name + ":");
+        playerScoreFields[i] = label.find("strong");
+      }
+      game.on("score", function() {
+        playerScoreFields[game.currentPlayer.number].html(game.currentPlayer.score);      
+      });
+      playersTurnField.html(game.currentPlayer.name);    
+      game.on("player-changed", function() {
+        playersTurnField.html(game.currentPlayer.name);            
+      });
+      game.on("winner", function() {
+        playersTurnField.html(game.currentPlayer.name + " wins!");            
+      });         
     }
     
-    slots.on("dragstart", function(e) {
-      e.originalEvent.dataTransfer.setData('Text', this.id);      
-    });  
-    slots.on("dragover", function(e) {
-      if (e.preventDefault) {
-        e.preventDefault();
-      }
-      $(this).addClass("over");
-      return false;
-    });
-    slots.on("dragleave", function(e) {
-      $(this).removeClass("over");
-    });
-    slots.on("drop", function(e) {
-      if (e.stopPropagation) {
-        e.stopPropagation();
-      }
-      var from = $("#" + e.originalEvent.dataTransfer.getData("Text")), to = $(this), tmp;
-      if (to.hasClass("tile")) {
-        // swap
-        if (from.attr("id").slice(0, 12) === "word-letter-") {
-          var index = parseInt(from.attr("id").slice(12));
-          game.board[index] = to.text();         
+    function initDragNDrop() {
+      var slots = $(".slot");      
+      slots.on("dragstart", function(e) {
+        e.originalEvent.dataTransfer.setData('Text', this.id);      
+      });  
+      slots.on("dragover", function(e) {
+        if (e.preventDefault) {
+          e.preventDefault();
         }
-        if (to.attr("id").slice(0, 12) === "word-letter-") {
-          var index = parseInt(to.attr("id").slice(12));
-          game.board[index] = from.text();         
-        }      
-        tmp = from.text();
-        from.text(to.text());
-        to.text(tmp);
-      } else {
-        if (from.attr("id").slice(0, 12) === "word-letter-") {
-          var index = parseInt(from.attr("id").slice(12));
-          delete game.board[index];
-        }
-        if (to.attr("id").slice(0, 12) === "word-letter-") {
-          var index = parseInt(to.attr("id").slice(12));
-          game.board[index] = from.text();         
-        }      
-        to.addClass("tile");
-        to.attr("draggable", true);
-        to.text(from.text());
-        from.text("");
-        from.removeClass("tile");      
-        from.removeAttr("draggable");      
-      }
-      to.removeClass("over");    
-      return false;
-    });
-
-    $(document).keypress(function(e) {
-      if (e.which === 13) {
-        game.submit();
+        $(this).addClass("over");
         return false;
-      }
-      return true;
-    });
+      });
+      slots.on("dragleave", function(e) {
+        $(this).removeClass("over");
+      });
+      slots.on("drop", function(e) {
+        if (e.stopPropagation) {
+          e.stopPropagation();
+        }
+        var from = $("#" + e.originalEvent.dataTransfer.getData("Text")), to = $(this), index, tmp;
+        if (to.hasClass("tile")) {
+          // swap
+          if (from.attr("id").slice(0, 12) === "word-letter-") {
+            index = parseInt(from.attr("id").slice(12));
+            game.board[index] = to.text();         
+          }
+          if (to.attr("id").slice(0, 12) === "word-letter-") {
+            index = parseInt(to.attr("id").slice(12));
+            game.board[index] = from.text();         
+          }      
+          tmp = from.text();
+          from.text(to.text());
+          to.text(tmp);
+        } else {
+          if (from.attr("id").slice(0, 12) === "word-letter-") {
+            index = parseInt(from.attr("id").slice(12));
+            delete game.board[index];
+          }
+          if (to.attr("id").slice(0, 12) === "word-letter-") {
+            index = parseInt(to.attr("id").slice(12));
+            game.board[index] = from.text();         
+          }      
+          to.addClass("tile");
+          to.attr("draggable", true);
+          to.text(from.text());
+          from.text("");
+          from.removeClass("tile");      
+          from.removeAttr("draggable");      
+        }
+        to.removeClass("over");    
+        return false;
+      });      
+    }
     
-    game.on("score", function() {
-      playerScoreFields[game.currentPlayer.number].html(game.currentPlayer.score);      
-    });
-
-    playersTurnField.html(game.currentPlayer.name);    
-    game.on("player-changed", function() {
-      playersTurnField.html(game.currentPlayer.name);            
-    });
+    function initKeyBindings() {
+      $(document).keypress(function(e) {
+        if (e.which === 13) {
+          game.submit();
+          return false;
+        }
+        return true;
+      });      
+    }
     
-    game.on("winner", function() {
-      console.log("winner");
-      playersTurnField.html(game.currentPlayer.name + " wins!");            
+    game.ready(function() {
+      initLetterTiles();
+      initPlayerIndicators();
+      initDragNDrop();
+      initKeyBindings();
     });
     
   })();
