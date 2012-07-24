@@ -1,54 +1,207 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Daddy and Corgan's Cool Number Game</title>
+    <title>Number Guess</title>
   </head>
   <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
   <body>
-    <h2>Daddy and Corgan's COOL Number Game!</h2>
-    <form>
-      <label>
-        Corgan's guess:
-        <input type="text" name="corganGuess" />
-      </label>
-      <label>
-        Daddy's guess:
-        <input type="text" name="daddyGuess" />
-      </label>      
-      <button>Go</button>
-    </form>
-    <div id="result">
+    <h1>Number Guess</h1>
+    <div id="pregame">
+      <section id="settings">
+        <h2>Settings</h2>
+        Guess between <input type="text" value="1" name="min" /> and <input type="text" value="100" name="max" />
+      </section>
+      <section id="players">
+        <h2>Players</h2>
+        <ul></ul>
+        <form id="addPlayer">
+          <input type="text" name="player">
+          <button type="submit">Add Player</button>
+        </form>
+      </section>    
+      <section id="start">
+        <h2>Ready?</h2>
+        <button>Start Game</button>
+      </section>      
+    </div>
+    <div id="guessing" style="display:none;">
+      <h2><span class="player-name">{{player}}</span>'s Turn</h2>
+      <form id="guess">
+        <input type="text" name="guess">
+        <button type="submit">Guess</button>
+      </form>
+    </div>
+    <div id="done" style="display:none">
+      <h2>The number was <span class="number">0</span>!</h2>
+      <section id="results">
+        <h3>Game Results</h3>
+        <ol></ol>
+      </section>
     </div>
   </body>
   <script>
-    var number = Math.floor(Math.random() * 21);
-    
-    $("button").on("click", function() {
-      var corgans = parseInt($("input[name=corganGuess]").val());
-      var daddys = parseInt($("input[name=daddyGuess]").val());
-      if (corgans == daddys) {
-        $("#result").html("You can't guess the same number silly!");                
-      } else {
-        if (corgans === number) {
-          $("#result").html("<strong>Corgan wins the jackpot! You guessed: " + number + " and win a prize!</strong>");    
-          return false;
+    var util = (function() {
+      
+      var map = (function() {
+        var mapPrototype = {
+           get: function(key) {
+            if (!this.data.hasOwnProperty(key)) {
+              this.data[key] = this.newValue(key);
+            }
+            return this.data[key];
+          }
         }
-        if (daddys === number) {
-          $("#result").html("<strong>Daddy wins the jackpot! You guessed: " + number + " and win a prize!</strong>");    
-          return false;          
+        return {
+          create: function(args) {
+            return Object.create(mapPrototype, {
+              data: { value: {} },
+              newValue: { value: args.newValue }
+            });
+          },
+          ofArrays: function() {
+            return this.create({
+              newValue: function() { return []; }      
+            });
+          }
+        }      
+      })();
+
+      function observable(obj) {
+        if (!obj) {
+          obj = {};
         }
-        var corgansAway = Math.abs(number - corgans);
-        var daddysAway = Math.abs(number - daddys);
-        if (corgansAway < daddysAway) {
-          $("#result").html("<strong>Corgan wins! The number is " + number + ".</strong>");     
-        } else if (daddysAway < corgansAway) {
-          $("#result").html("<strong>Daddy wins! The number is " + number + ".</strong>");        
-        } else {
-          $("#result").html("It's a tie! The number is " + number + ".</strong>");
+        obj.listeners = map.ofArrays();
+        obj.on = function(event, listener) {
+          this.listeners.get(event).push(listener);
+          return this;       
         }
-        number = Math.floor(Math.random() * 21);
+        obj.trigger = function(event, args) {
+          var listeners = this.listeners.get(event);
+          listeners.forEach(function(listener) {
+            listener(args);
+          });
+          return this;        
+        }
+        return obj;
       }
+      
+      return {
+        map: map,
+        observable: observable
+      }
+            
+    })();
+    
+    var numberguess = util.observable();
+    numberguess.players = new Array();
+    numberguess.settings = {};
+    numberguess.settings.min = 1;
+    numberguess.settings.max = 100;
+    numberguess.guesses = {};
+    numberguess.addPlayer = function(name) {
+      var player = {};
+      player.number = this.players.length + 1;
+      player.name = name;
+      this.players.push(player);
+      this.trigger("player-added", player);
+    }
+    numberguess.start = function() {
+      if (this.players.length < 2) {
+        throw new Error("Not enough players to play");
+      }
+      this.number = Math.floor(Math.random() * this.settings.max) + 1;
+      this.player = this.players[0];
+      this.trigger("started");
+      this.trigger("player-changed");
+    }
+    numberguess.guess = function(value) {
+      if (!(value >= this.settings.min && value <= this.settings.max)) {
+        throw new Error("Guess not in bounds");
+      }
+      if (this.guesses[value]) {
+        throw new Error(value + " already guessed");
+      }
+      this.player.guess = value;
+      this.guesses[value] = true;
+      if (!this.nextPlayer()) {
+        this.score();
+        this.trigger("done");
+      }
+    }
+    numberguess.nextPlayer = function() {
+      if (this.player.number === this.players.length) {
+        return false;
+      }
+      this.player = this.players[this.player.number];
+      this.trigger("player-changed");
+      return true;
+    }
+    numberguess.score = function() {
+      var number = this.number;
+      this.players.forEach(function(player) {
+        player.distance = Math.abs(number - player.guess);
+      });
+      this.players.sort(function(a, b) {
+        if (a.distance > b.distance) {
+          return 1;
+        } else if (a.distance < b.distance) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+    }
+
+    var playerName = $("#addPlayer input[name=player]");
+    $("#addPlayer").submit(function() {
+      numberguess.addPlayer(playerName.val());
+      playerName.val("").focus();
       return false;
-    })
+    });
+  
+    var playerList = $("#players ul");
+    numberguess.on("player-added", function(player) {
+      var playerItem = $("<li/>").text(player.name);
+      playerList.append(playerItem);
+    });
+    
+    var startButton = $("#start button");
+    startButton.click(function() {
+      numberguess.settings.min = $("#settings input[name=min]").val();
+      numberguess.settings.max = $("#settings input[name=max]").val();      
+      numberguess.start();
+      return false;
+    });
+    
+    numberguess.on("started", function() {
+      $("#pregame").css("display", "none");
+      $("#guessing").css("display", "block");
+    });
+
+    var number = $("#guess input[name=guess]");
+    $("#guess").submit(function() {
+      numberguess.guess(parseInt(number.val()));
+      number.val('').focus();
+      return false;
+    });
+    
+    var playerGuessing = $("#guessing h2 span");
+    numberguess.on("player-changed", function() {
+      playerGuessing.text(numberguess.player.name);
+    });
+
+    numberguess.on("done", function() {
+      $("#guessing").css("display", "none");
+      $("#done h2 span.number").text(numberguess.number);
+      var resultList = $("#results ol");      
+      numberguess.players.forEach(function(player) {
+        var playerItem = $("<li/>").text(player.name + " (Guess: " + player.guess + ", Distance: " + player.distance + ")");
+        resultList.append(playerItem);
+      });
+      $("#done").css("display", "block");      
+    });
+    
+    playerName.focus();
+
   </script>
 </html>
