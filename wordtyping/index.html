@@ -240,8 +240,67 @@
     lessons: [ three_a, three_i, three_o, three_e, three_u ]
   }
   
+  var stage_two = (function() {
+
+    var ar = {
+      name: "ar",
+      words: [ "part", "tart", "start", "fart", "harp", "sharp", "dart", "mart", "bard", "barf", "bark", "bars" ]
+    }
+
+    var er = {
+      name: "er",
+      words: [ "herd", "nerd", "germ", "verb", "hers", "herb" ]
+    }
+    
+    var ir = {
+      name: "ir",
+      words: [ "girl", "bird", "dirt", "kirk" ]
+    }
+
+    var or = {
+      name: "or",
+      words: [ "fort", "corn", "dorm", "horn", "sort", "port", "morn", "worm", "ford", "orb", "dory", "tort", "norm" ]
+    }
+    
+    var ur = {
+      name: "ur",
+      words: [ "surf", "curb", "burp", "blur", "turk", "murk", "lurk", "burn", "turf", "curd", "turn" ]
+    }
+            
+    var a = {
+      name: "4-5 Letter Words (a)",
+      sets: [ ar ]
+    }
+    
+    var e = {
+      name: "4-5 Letter Words (e)",
+      sets: [ er ]
+    }
+
+    var i = {
+      name: "4-5 Letter Words (i)",
+      sets: [ ir ]
+    }
+    
+    var o = {
+      name: "4-5 Letter Words (o)",
+      sets: [ or ]
+    }
+    
+    var u = {
+      name: "4-5 Letter Words (u)",
+      sets: [ ur ]
+    }
+        
+    return {
+      name: "Stage 2",
+      lessons: [ a, e, i, o, u ]
+    }
+  
+  })();
+  
   var words = {};
-  words.stages = [ stage_one ];  
+  words.stages = [ stage_two ];
   words.letters = function() {
     return $.map(this.currentSet.words[this.currentWord].split(""), function(letter, index) {
       return $("<span/>").attr("id", "letter-" + index).addClass("letter").text(letter).get(0);
@@ -314,7 +373,7 @@
             nextSetButton.focus();         
           }
           changingWord = false;
-        }, 1000);
+        }, 10);
       } else {
         words.currentLetter += 1;        
       }
