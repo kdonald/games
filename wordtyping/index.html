@@ -29,218 +29,450 @@
     $("#rules").toggleClass("hidden");
     return false;
   });
+  
+  var stage_one = (function() {
 
-  // 3 letter words (a)
-  
-  var am = {
-    name: "am",
-    words: [ "jam", "ham" ]
-  }
-  
-  var an = {
-    name: "an",
-    words: [ "can", "fan", "ran", "ban", "man", "van", "pan" ]
-  }
-  
-  var ap = {
-    name: "ap",
-    words: [ "cap", "tap", "gap", "map" ]
-  }
-  
-  var at = {
-    name: "at",
-    words: [ "cat", "sat", "bat", "fat", "pat", "mat", "rat", "hat" ]
-  }
+    // 3 letter words (a)
+    
+    var am = {
+      name: "am",
+      words: [ "jam", "ham" ]
+    }
+    
+    var an = {
+      name: "an",
+      words: [ "can", "fan", "ran", "ban", "man", "van", "pan" ]
+    }
+    
+    var ap = {
+      name: "ap",
+      words: [ "cap", "tap", "gap", "map" ]
+    }
+    
+    var at = {
+      name: "at",
+      words: [ "cat", "sat", "bat", "fat", "pat", "mat", "rat", "hat" ]
+    }
 
-  var ag = {
-    name: "ag",
-    words: [ "bag", "lag", "nag", "rag", "sag", "tag" ]
-  }
-  
-  var ab = {
-    name: "ab",
-    words: [ "cab", "jab", "tab" ]
-  }
-  
-  var ax = {
-    name: "ax",
-    words: [ "max", "fax", "tax", "wax" ]
-  }
-  
-  // 3 letter words (i)
-  
-  var it = {
-    name: "it",
-    words: [ "bit", "fit", "hit", "kit", "pit", "sit" ]
-  }
+    var ag = {
+      name: "ag",
+      words: [ "bag", "lag", "nag", "rag", "sag", "tag" ]
+    }
+    
+    var ab = {
+      name: "ab",
+      words: [ "cab", "jab", "tab" ]
+    }
+    
+    var ax = {
+      name: "ax",
+      words: [ "max", "fax", "tax", "wax" ]
+    }
+    
+    // 3 letter words (i)
+    
+    var it = {
+      name: "it",
+      words: [ "bit", "fit", "hit", "kit", "pit", "sit" ]
+    }
 
-  var inSet = {
-    name: "in",
-    words: [ "bin", "fin", "pin", "tin", "win" ]
-  }
+    var inSet = {
+      name: "in",
+      words: [ "bin", "fin", "pin", "tin", "win" ]
+    }
 
-  var ig = {
-    name: "ig",
-    words: [ "big", "dig", "jig", "rig" ]
-  }
+    var ig = {
+      name: "ig",
+      words: [ "big", "dig", "jig", "rig" ]
+    }
 
-  var ip = {
-    name: "ip",
-    words: [ "dip", "hip", "lip", "sip", "tip", "zip" ]
-  }
-  
-  var id = {
-    name: "id",
-    words: [ "bid", "did", "hid", "lid", "mid", "rid" ]
-  }
-  
-  var ib = {
-    name: "ib",
-    words: [ "bib", "nib", "rib" ]
-  }
-  
-  var im = {
-    name: "im",
-    words: [ "him", "dim", "rim" ]
-  }
-  
-  var is = {
-    name: "is",
-    words: [ "his" ]
-  }
-  
-  var ix = {
-    name: "ix",
-    words: [ "fix", "mix" ]
-  }  
+    var ip = {
+      name: "ip",
+      words: [ "dip", "hip", "lip", "sip", "tip", "zip" ]
+    }
+    
+    var id = {
+      name: "id",
+      words: [ "bid", "did", "hid", "lid", "mid", "rid" ]
+    }
+    
+    var ib = {
+      name: "ib",
+      words: [ "bib", "nib", "rib" ]
+    }
+    
+    var im = {
+      name: "im",
+      words: [ "him", "dim", "rim" ]
+    }
+    
+    var is = {
+      name: "is",
+      words: [ "his" ]
+    }
+    
+    var ix = {
+      name: "ix",
+      words: [ "fix", "mix" ]
+    }  
 
-  // 3 letter words (o)
-  
-  var ot = {
-    name: "ot",
-    words: [ "hot", "pot", "cot", "dot", "got", "lot", "not", "rot" ]
-  }
-  
-  var op = {
-    name: "op",
-    words: [ "cop", "hop", "pop", "top" ]
-  }
-  
-  var ob = {
-    name: "ob",
-    words: [ "bob", "job", "mob", "sob" ]
-  }
-  
-  var od = {
-    name: "od",
-    words: [ "pod", "nod", "rod" ]
-  }
-  
-  var og = {
-    name: "og",
-    words: [ "fog", "jog", "log", "dog" ]
-  }
+    // 3 letter words (o)
+    
+    var ot = {
+      name: "ot",
+      words: [ "hot", "pot", "cot", "dot", "got", "lot", "not", "rot" ]
+    }
+    
+    var op = {
+      name: "op",
+      words: [ "cop", "hop", "pop", "top" ]
+    }
+    
+    var ob = {
+      name: "ob",
+      words: [ "bob", "job", "mob", "sob" ]
+    }
+    
+    var od = {
+      name: "od",
+      words: [ "pod", "nod", "rod" ]
+    }
+    
+    var og = {
+      name: "og",
+      words: [ "fog", "jog", "log", "dog" ]
+    }
 
-  var or = {
-    name: "or",
-    words: [ "for" ]
-  }
+    var or = {
+      name: "or",
+      words: [ "for" ]
+    }
 
-  // 3 letter words (e)
-  
-  var en = {
-    name: "en",
-    words: [ "ten", "men", "hen" ]
-  }
-  
-  var et = {
-    name: "et",
-    words: [ "pet", "met", "wet", "let", "get" ]
-  }
-  
-  var ed = {
-    name: "ed",
-    words: [ "bed", "red" ]
-  }
-  
-  var eg = {
-    name: "eg",
-    words: [ "leg" ]
-  }
-  
-  // 3 letter words (u)
+    // 3 letter words (e)
+    
+    var en = {
+      name: "en",
+      words: [ "ten", "men", "hen" ]
+    }
+    
+    var et = {
+      name: "et",
+      words: [ "pet", "met", "wet", "let", "get" ]
+    }
+    
+    var ed = {
+      name: "ed",
+      words: [ "bed", "red" ]
+    }
+    
+    var eg = {
+      name: "eg",
+      words: [ "leg" ]
+    }
+    
+    // 3 letter words (u)
 
-  var ub = {
-    name: "ub",
-    words: [ "tub", "rub" ]
-  }
-  
-  var ud = {
-    name: "ud",
-    words: [ "bud", "mud" ]
-  }
+    var ub = {
+      name: "ub",
+      words: [ "tub", "rub" ]
+    }
+    
+    var ud = {
+      name: "ud",
+      words: [ "bud", "mud" ]
+    }
 
-  var ug = {
-    name: "ug",
-    words: [ "bug", "hug" ]
-  }
-  
-  var um = {
-    name: "um",
-    words: [ "gum", "hum" ]
-  }
-  
-  var un = {
-    name: "un",
-    words: [ "gun", "bun", "sun", "fun", "run" ]
-  }
-  
-  var up = {
-    name: "up",
-    words: [ "pup", "cup" ]
-  }
+    var ug = {
+      name: "ug",
+      words: [ "bug", "hug" ]
+    }
+    
+    var um = {
+      name: "um",
+      words: [ "gum", "hum" ]
+    }
+    
+    var un = {
+      name: "un",
+      words: [ "gun", "bun", "sun", "fun", "run" ]
+    }
+    
+    var up = {
+      name: "up",
+      words: [ "pup", "cup" ]
+    }
 
-  var ut = {
-    name: "ut",
-    words: [ "cut", "hut" ]
-  }
+    var ut = {
+      name: "ut",
+      words: [ "cut", "hut" ]
+    }
 
-  var us = {
-    name: "us",
-    words: [ "bus" ]
-  }
+    var us = {
+      name: "us",
+      words: [ "bus" ]
+    }
 
-  var three_a = { 
-    name: "3 Letter Words (a)",
-    sets: [ am, an, ap, at, ag, ab, ax ]
-  }
+    var three_a = { 
+      name: "3 Letter Words (a)",
+      sets: [ am, an, ap, at, ag, ab, ax ]
+    }
 
-  var three_i = { 
-    name: "3 Letter Words (i)",
-    sets: [ it, inSet, ig, ip, id, ib, im, is, ix ]
-  }
-  
-  var three_o = { 
-    name: "3 Letter Words (o)",
-    sets: [ ot, op, ob, od, og, or ]
-  }
+    var three_i = { 
+      name: "3 Letter Words (i)",
+      sets: [ it, inSet, ig, ip, id, ib, im, is, ix ]
+    }
+    
+    var three_o = { 
+      name: "3 Letter Words (o)",
+      sets: [ ot, op, ob, od, og, or ]
+    }
 
-  var three_e = { 
-    name: "3 Letter Words (e)",
-    sets: [ en, et, ed, eg ]
-  }
+    var three_e = { 
+      name: "3 Letter Words (e)",
+      sets: [ en, et, ed, eg ]
+    }
 
-  var three_u = { 
-    name: "3 Letter Words (u)",
-    sets: [ ub, ud, ug, um, un, up, ut, us ]
-  }
-  
-  var stage_one = { 
-    name: "Stage 1",
-    lessons: [ three_a, three_i, three_o, three_e, three_u ]
-  }
+    var three_u = { 
+      name: "3 Letter Words (u)",
+      sets: [ ub, ud, ug, um, un, up, ut, us ]
+    }
+    
+    return {
+      name: "Stage 1",
+      lessons: [ three_a, three_i, three_o, three_e, three_u ]
+    }
+    
+  })();
   
   var stage_two = (function() {
+
+    var th = {
+      name: "th",
+      words: [ "this", "that", "them", "thin", "then", "than", "bath", "both", "path", "with" ]
+    }
+
+    var ch = {
+      name: "ch",
+      words: [ "chip", "chin", "chat", "chop", "such", "much", "inch", "rich", "itch" ]
+    }
+    
+    var sh = {
+      name: "sh",
+      words: [ "shop", "shot", "shin", "ship", "fish", "cash", "dish", "rash", "wash" ]
+    }
+
+    var wh = {
+      name: "wh",
+      words: [ "what", "when", "whip", "why", "which" ]
+    }
+
+    var set_one = {
+      name: "th, sh, ch, wh",
+      sets: [ th, ch, sh, wh ]
+    }
+
+    var bl = {
+      name: "bl",
+      words: [ "blot", "blow", "blue", "blur", "blab", "blush" ]
+    }
+
+    var cl = {
+      name: "cl",
+      words: [ "clan", "clap", "clip", "clue", "clot", "club", "clad" ]
+    }
+    
+    var gl = {
+      name: "gl",
+      words: [ "glad", "glass", "glue", "glow" ]
+    }
+
+    var fl = {
+      name: "fl",
+      words: [ "flag", "flat", "flip", "flow", "fly", "flush", "flash" ]
+    }
+    
+    var pl = {
+      name: "pl",
+      words: [ "plot", "plum", "plus", "play" ]
+    }
+        
+    var set_two = {
+      name: "bl, cl, gl, fl, pl",
+      sets: [ bl, cl, gl, fl, pl ]
+    }
+
+    var br = {
+      name: "br",
+      words: [ "brag", "bran", "bart", "brim", "bring" ]
+    }
+
+    var cr = {
+      name: "cr",
+      words: [ "crab", "crop", "cram", "crap", "cry" ]
+    }
+    
+    var dr = {
+      name: "dr",
+      words: [ "drop", "drum", "drip", "drag", "dry" ]
+    }
+
+    var fr = {
+      name: "fr",
+      words: [ "frog", "from", "free", "fry" ]
+    }
+    
+    var gr = {
+      name: "gr",
+      words: [ "grip", "grab", "gram", "grid", "grit", "grow", "grin" ]
+    }
+
+    var pr = {
+      name: "pr",
+      words: [ "prim", "prom", "prop", "pram", "pry" ]
+    }
+    
+    var tr = {
+      name: "tr",
+      words: [ "tram", "trap", "trip", "trim", "try" ]
+    }
+            
+    var set_three = {
+      name: "br, cr, dr, fr, gr, pr",
+      sets: [ br, cr, dr, fr, gr, pr ]
+    }
+    
+    var sl = {
+      name: "sl",
+      words: [ "slim", "slot", "slogt", "slip", "sleep", "slow" ]
+    }
+
+    var st = {
+      name: "st",
+      words: [ "step", "stop", "stem", "stab", "star", "sty" ]
+    }
+    
+    var sp = {
+      name: "sp",
+      words: [ "spit", "spat", "spin", "spot", "spy" ]
+    }
+
+    var sm = {
+      name: "sm",
+      words: [ "smack", "small", "smash", "smell", "smog" ]
+    }
+    
+    var sn = {
+      name: "sn",
+      words: [ "snap", "snip", "snob", "snow", "snug" ]
+    }
+
+    var sw = {
+      name: "sw",
+      words: [ "swim", "swam", "swum", "swap", "sweep", "sweet" ]
+    }
+
+    var sk = {
+      name: "sk",
+      words: [ "skin", "skip", "skim", "skid", "sky" ]
+    }
+        
+    var str = {
+      name: "str",
+      words: [ "strap", "street", "string", "strum", "strip" ]
+    }
+    
+    var spr = {
+      name: "spr",
+      words: [ "spray", "spring", "sprint", "sprig" ]
+    }
+    
+    var scr = {
+      name: "scr",
+      words: [ "scrub", "scrap", "scram" ]
+    }
+    
+    var set_four = {
+      name: "sl, st, sp, sm, sn, sw, sk, str, spr, scr",
+      sets: [ sl, st, sp, sm, sn, sw, sk, str, spr, scr ]
+    }
+        
+    return {
+      name: "Stage 2",
+      lessons: [ set_one, set_two, set_three, set_four ]
+    }
+  
+  })();
+  
+  var stage_three = (function() {
+
+    var oa = {
+      name: "oa",
+      words: [ "boat", "coat", "foam", "goal", "goat", "load", "loan", "moan", "oat", "road", "soap" ]
+    }
+
+    var ea = {
+      name: "ea",
+      words: [ "eat", "beat", "beach", "bead", "beak", "bean", "clean", "cream", "meat", "neat", "read" ]
+    }
+    
+    var ai = {
+      name: "ai",
+      words: [ "aid", "aim", "brain", "chain", "rain", "main", "gain", "pain", "stain", "tail", "sail", "train", "vain", "nail", "pail" ]
+    }
+
+    var ie = {
+      name: "ie",
+      words: [ "lie", "tie", "pie", "die" ]
+    }
+    
+    var ee = {
+      name: "ee",
+      words: [ "bee", "see", "beef", "deep", "deer", "feed", "feel", "keep", "meet", "need", "seed", "seen", "week" ]
+    }
+            
+    var oe = {
+      name: "oe",
+      words: [ "foe", "doe", "hoe", "toe" ]
+    }
+    
+    var longVowels = {
+      name: "Long Vowels",
+      sets: [ oa, ea, ai, ie, ee, oe ]
+    }
+
+    var a = {
+      name: "Silent E - a",
+      words: [ "base", "case", "fade", "made", "bak", "cake", "fake", "lake", "make", "rake", "take", "sale", "male", "game", "came", "name", "same", "fame", "cane", "tape", "date", "fate", "gate", "mate", "rate", "cave", "save", "wave" ]
+    }
+
+    var i = {
+      name: "Silent E - i",
+      words: [ "side", "hide", "ride", "wide", "like", "hike", "file", "pile", "mile", "time", "lime", "nite", "kite", "rise", "wise", "line", "mine", "fine", "nine", "wipe", "pipe" ]
+    }
+    
+    var o = {
+      name: "Silent E - o",
+      words: [ "bone", "cone", "home", "dome", "hole", "mole", "hope", "rope", "poke", "woke", "vote", "note", "nose", "rose" ]
+    }
+
+    var u = {
+      name: "Silent E - u",
+      words: [ "cute", "mute", "duke", "fume", "dune", "tune", "cube", "fuse", "tube" ]
+    }
+    
+    var silentE = {
+      name: "Silent E",
+      sets: [ a, i, o, u ]
+    }
+    
+    return {
+      name: "Stage 3",
+      lessons: [ longVowels, silentE ]
+    }
+      
+  })();
+  
+  var stage_four = (function() {
 
     var ar = {
       name: "ar",
@@ -293,14 +525,14 @@
     }
         
     return {
-      name: "Stage 2",
+      name: "Stage 4",
       lessons: [ a, e, i, o, u ]
     }
   
   })();
   
   var words = {};
-  words.stages = [ stage_two ];
+  words.stages = [ stage_one, stage_two, stage_three, stage_four ];
   words.letters = function() {
     return $.map(this.currentSet.words[this.currentWord].split(""), function(letter, index) {
       return $("<span/>").attr("id", "letter-" + index).addClass("letter").text(letter).get(0);
@@ -313,8 +545,13 @@
       this.currentSetIndex = 0;
     } else {
       if (this.stages[this.currentStageIndex].lessons[this.currentLessonIndex].sets.length === (this.currentSetIndex + 1)) {
-        this.currentLessonIndex += 1;
-        this.currentSetIndex = 0;        
+        if (this.stages[this.currentStageIndex].lessons.length === (this.currentLessonIndex + 1)) {
+          this.currentStageIndex += 1;
+          this.currentLessonIndex = 0;
+        } else {
+          this.currentLessonIndex += 1;
+        }
+        this.currentSetIndex = 0;
       } else {
         this.currentSetIndex += 1;        
       }
