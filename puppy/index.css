@@ -1,0 +1,35 @@
+body {
+  font-family: Helvetica;
+}
+
+.hidden {
+  display: none;
+}
+
+.store {
+}
+
+.puppy {
+  height: 180px;
+  width: 180px;
+  border: 1px solid;
+  float: left;
+  margin-right: 20px;
+  text-indent: -9999px;  
+}
+
+#beagle.puppy {
+  background: url("images/beagle.jpg");
+}
+
+#whippet.puppy {
+  background: url("images/whippet.jpg");
+}
+
+#retriever.puppy {
+  background: url("images/golden-retriever.jpg");  
+}
+
+#terrier.puppy {
+  background: url("images/terrier.jpg");
+}

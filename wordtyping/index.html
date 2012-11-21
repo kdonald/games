@@ -532,7 +532,7 @@
   })();
   
   var words = {};
-  words.stages = [ stage_one, stage_two, stage_three, stage_four ];
+  words.stages = [ stage_two, stage_three, stage_four ];
   words.letters = function() {
     return $.map(this.currentSet.words[this.currentWord].split(""), function(letter, index) {
       return $("<span/>").attr("id", "letter-" + index).addClass("letter").text(letter).get(0);

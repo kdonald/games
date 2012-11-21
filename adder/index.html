@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title>The Addition Game</title>
+    <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  </head>
+  <body>
+      <h1>The Addition Game</h1>
+      <input id="first" type="text" size=8/>
+        <span>+</span>
+      <input id="second" type="text" size=8/>
+        <span>=</span>
+      <span id="value"></span>
+  </body>
+  <script>
+    $("#second").on("blur", function() {
+      var first = parseInt($("#first").val()),
+        second = parseInt($("#second").val());
+      var answer = first + second;
+      console.log("The answer is:", answer);
+      $("#value").html(answer);
+    });
+  </script>
+</html>
