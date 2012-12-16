@@ -17,7 +17,11 @@
       <p>
         Enjoy playing! -  Annabelle and Corgan, Animal Card Designers
       </p>
-    </div>    
+    </div>
+    <div id="profile">
+      <label for="name" >Your Name:</label>
+      <input id="name" type="text"></input>
+    </div>
     <div id="store">
       <h2>Pick your puppy</h2>
       <div id="beagle" class="puppy">Beagle</div>
@@ -26,21 +30,101 @@
       <div id="terrier" class="puppy">Jack-Russell Terrier</div>   
     </div>
     <div id="selection">
-      <p>You picked a <span class="breed"></span>!</p>
-      <label>
-        What name would you like to give your puppy?
-      </label>
+      <p>You picked a <span class="puppy-type"></span></p>
+      <label for="puppy-name">What name would you like to give your puppy?</label>
+      <input id="puppy-name"></input>
+      <input type="radio" name="gender" value="boy">Boy</input>
+      <input type="radio" name="gender" value="girl">Girl</input>      
     </div>
+    <button id="start">Start</button>
   </body>
   <script>
   
+  var util = (function() {
+    
+    var map = (function() {
+      var mapPrototype = {
+         get: function(key) {
+          if (!this.data.hasOwnProperty(key)) {
+            this.data[key] = this.newValue(key);
+          }
+          return this.data[key];
+        }
+      }
+      return {
+        create: function(args) {
+          return Object.create(mapPrototype, {
+            data: { value: {} },
+            newValue: { value: args.newValue }
+          });
+        },
+        ofArrays: function() {
+          return this.create({
+            newValue: function() { return []; }      
+          });
+        }
+      }      
+    })();
+
+    function observable(obj) {
+      if (!obj) {
+        obj = {};
+      }
+      obj.listeners = map.ofArrays();
+      obj.on = function(event, listener) {
+        this.listeners.get(event).push(listener);
+        return this;       
+      }
+      obj.trigger = function(event, args) {
+        var listeners = this.listeners.get(event);
+        listeners.forEach(function(listener) {
+          listener(args);
+        });
+        return this;        
+      }
+      return obj;
+    }
+    
+    return {
+      map: map,
+      observable: observable
+    }
+          
+  })();
+  
+    var game = {};
+    game.puppyTypes = {};
+    var beagle = { name: "Beagle" },
+      whippet = { name: "Whippet" },
+      retriever = { name: "Retriever" },
+      terrier = { name: "Terrier" };      
+    game.puppyTypes["beagle"] = beagle;
+    game.puppyTypes["whippet"] = whippet;
+    game.puppyTypes["retriever"] = retriever;
+    game.puppyTypes["terrier"] = terrier;
+    game.puppyType = function(type) {
+      if (type) {
+        this._puppyType = this.puppyTypes[type];
+        this.trigger("puppy-type", this._puppyType);
+      } else {
+        return this._puppyType;        
+      }
+    }
+    util.observable(game);
+    
     $("p > a").click(function() {
       $("#rules").toggleClass("hidden");
       return false;
     });
  
     $(".puppy").click(function() {
-      console.log("You picked a puppy!");
+      var el = $(this);
+      game.puppyType(el.attr("id"));
     });
+    
+    game.on("puppy-type", function(type) {
+      $(".puppy-type").html(type.name);
+    });
+    
   </script>
 </html>
