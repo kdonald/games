@@ -1,0 +1,19 @@
+body {
+  font-family: Helvetica;  
+  margin: 0px;
+  padding: 0px;
+  text-align: center; 
+}
+
+.hidden {
+  display: none;
+}
+
+canvas {
+  outline: 0;
+  border: 1px solid #000;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+

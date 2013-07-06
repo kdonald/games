@@ -18,25 +18,29 @@
         Enjoy playing! -  Annabelle and Corgan, Animal Card Designers
       </p>
     </div>
-    <div id="profile">
-      <label for="name" >Your Name:</label>
-      <input id="name" type="text"></input>
+    <div id="start">
+      <div id="profile">
+        <label for="name" >Your Name:</label>
+        <input id="name" type="text"></input>
+      </div>
+      <div id="store">
+        <h2>Pick your puppy</h2>
+        <div id="beagle" class="puppy">Beagle</div>
+        <div id="whippet" class="puppy">Whippet</div>
+        <div id="retriever" class="puppy">Golden Retriever</div>
+        <div id="terrier" class="puppy">Jack-Russell Terrier</div>
+        <div id="chihauhau" class="puppy">Chihauhau</div>         
+      </div>
+      <div id="selection">
+        <p>You picked a <span class="puppy-type"></span></p>
+        <label for="puppy-name">What name would you like to give your puppy?</label>
+        <input id="puppy-name"></input>
+        <input type="radio" name="gender" value="boy">Boy</input>
+        <input type="radio" name="gender" value="girl">Girl</input>      
+      </div>
+      <button id="start">Start</button>
     </div>
-    <div id="store">
-      <h2>Pick your puppy</h2>
-      <div id="beagle" class="puppy">Beagle</div>
-      <div id="whippet" class="puppy">Whippet</div>
-      <div id="retriever" class="puppy">Golden Retriever</div>
-      <div id="terrier" class="puppy">Jack-Russell Terrier</div>   
-    </div>
-    <div id="selection">
-      <p>You picked a <span class="puppy-type"></span></p>
-      <label for="puppy-name">What name would you like to give your puppy?</label>
-      <input id="puppy-name"></input>
-      <input type="radio" name="gender" value="boy">Boy</input>
-      <input type="radio" name="gender" value="girl">Girl</input>      
-    </div>
-    <button id="start">Start</button>
+    <div id="house">House</div>
   </body>
   <script>
   
@@ -97,11 +101,13 @@
     var beagle = { name: "Beagle" },
       whippet = { name: "Whippet" },
       retriever = { name: "Retriever" },
-      terrier = { name: "Terrier" };      
+      terrier = { name: "Terrier" },
+      chihauhau = { name: "Chihauhau" };      
     game.puppyTypes["beagle"] = beagle;
     game.puppyTypes["whippet"] = whippet;
     game.puppyTypes["retriever"] = retriever;
     game.puppyTypes["terrier"] = terrier;
+    game.puppyTypes["chihauhau"] = chihauhau;
     game.puppyType = function(type) {
       if (type) {
         this._puppyType = this.puppyTypes[type];
@@ -124,6 +130,10 @@
     
     game.on("puppy-type", function(type) {
       $(".puppy-type").html(type.name);
+    });
+    
+    $("button").click(function() {
+      $("#start").css("display", "none");
     });
     
   </script>
